@@ -1,0 +1,16 @@
+# Node dependencies
+Taskly Frontend/node_modules/
+Taskly Frontend/.angular/
+Taskly Frontend/dist/
+
+# Java compilation files
+Taskly Backend/target/
+Taskly Backend/.idea/
+Taskly Backend/*.iml
+Taskly Backend/.settings/
+Taskly Backend/.classpath
+Taskly Backend/.project
+
+# OS temporary files
+.DS_Store
+Thumbs.db
