@@ -5,6 +5,7 @@ import com.Task_Management_System.TMS.exception.ResourceNotFoundException;
 import com.Task_Management_System.TMS.model.Notification;
 import com.Task_Management_System.TMS.model.User;
 import com.Task_Management_System.TMS.repository.NotificationRepository;
+import com.Task_Management_System.TMS.repository.JoinRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +19,26 @@ import java.util.stream.Collectors;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final JoinRequestRepository joinRequestRepository;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<NotificationResponseDto> getUserNotifications(UUID userId) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        
+        // Self-heal: auto-read notifications of requests that have already been resolved
+        for (Notification n : notifications) {
+            if ("REQUEST".equals(n.getType()) && n.getRequestId() != null && !n.isRead()) {
+                joinRequestRepository.findById(n.getRequestId()).ifPresent(req -> {
+                    if (!"PENDING".equals(req.getStatus())) {
+                        n.setRead(true);
+                        notificationRepository.save(n);
+                    }
+                });
+            }
+        }
+        
+        return notifications.stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
     }

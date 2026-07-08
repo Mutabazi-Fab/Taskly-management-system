@@ -10,6 +10,7 @@ import com.Task_Management_System.TMS.repository.JoinRequestRepository;
 import com.Task_Management_System.TMS.repository.TeamMemberRepository;
 import com.Task_Management_System.TMS.repository.TeamRepository;
 import com.Task_Management_System.TMS.repository.UserRepository;
+import com.Task_Management_System.TMS.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class JoinRequestServiceImpl implements JoinRequestService {
     private final UserRepository userRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     @Override
     @Transactional
@@ -87,6 +89,12 @@ public class JoinRequestServiceImpl implements JoinRequestService {
         request.setStatus("APPROVED");
         JoinRequest savedRequest = joinRequestRepository.save(request);
 
+        // Mark related request notifications as read so they disappear from active list
+        notificationRepository.findByRequestId(requestId).forEach(n -> {
+            n.setRead(true);
+            notificationRepository.save(n);
+        });
+
         // Notify the Requester
         String title = "Request Approved";
         String message = "Your request to join " + request.getTeam().getName() + " was approved.";
@@ -108,6 +116,12 @@ public class JoinRequestServiceImpl implements JoinRequestService {
         request.setStatus("DENIED");
         request.setDenialReason(reason);
         JoinRequest savedRequest = joinRequestRepository.save(request);
+
+        // Mark related request notifications as read so they disappear from active list
+        notificationRepository.findByRequestId(requestId).forEach(n -> {
+            n.setRead(true);
+            notificationRepository.save(n);
+        });
 
         // Notify the Requester
         String title = "Request Denied";
