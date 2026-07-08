@@ -6,14 +6,14 @@ Built as a decoupled architecture that packages into a unified Spring Boot monor
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 * **Backend:** Java 21, Spring Boot 3.x, Spring Security (JWT Stateless Authentication), Spring Data JPA.
 * **Database:** PostgreSQL.
 * **Frontend:** Angular 18+, Reactive signals for state management, Vanilla CSS (Premium glassmorphic styling, HSL colors).
 
 ---
 
-## ✨ Features
+##  Features
 1. **Interactive Kanban Board:** Add, rename, or delete columns, create tasks, assign members, filter by priority or assignee, and drag/move tasks across columns.
 2. **Deadline Calendar:** Dynamic visual schedule plotting calendar cards computed from real-time database deadlines.
 3. **Role-Based Permissions:** 
@@ -29,7 +29,7 @@ Built as a decoupled architecture that packages into a unified Spring Boot monor
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 ```text
 TMS/
 ├── Taskly Backend/                 # Spring Boot REST API
@@ -56,7 +56,7 @@ TMS/
 
 ---
 
-## 📋 Prerequisites
+##  Prerequisites
 Ensure you have the following installed on your local machine:
 * **JDK 17 or higher** (JDK 21 recommended)
 * **Node.js** (v18.x or higher) & **npm** (v9.x or higher)
@@ -65,7 +65,7 @@ Ensure you have the following installed on your local machine:
 
 ---
 
-## 🚀 How to Run Locally
+##  How to Run Locally
 
 ### 1. Database Setup
 Create a PostgreSQL database named `taskly`:
@@ -96,7 +96,7 @@ The client dashboard will compile and be available at **`http://localhost:4200`*
 
 ---
 
-## 🚂 Packaging & Deployment (Railway)
+##  Packaging & Deployment (Railway)
 Taskly is configured to deploy both the frontend and backend in a single container.
 
 ### 1. Compile the Frontend
