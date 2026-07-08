@@ -1,0 +1,1034 @@
+<div class="dashboard-container" [class.sidebar-minimized]="isSidebarMinimized()">
+  
+  <!-- LEFT SIDEBAR: Brand & Spaced Navigation Menu -->
+  <aside class="sidebar glass-card" [class.minimized]="isSidebarMinimized()">
+    <div class="sidebar-brand" style="border-bottom: none; padding-bottom: 0;">
+      @if (!isSidebarMinimized()) {
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <img src="/logo.png" alt="Taskly Logo" style="height: 36px; width: auto; border-radius: 6px; background: #FFFFFF; padding: 2px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" />
+          <span class="brand-name">Taskly</span>
+        </div>
+      } @else {
+        <span class="brand-check">✓</span>
+      }
+      <button class="btn-toggle-sidebar" (click)="isSidebarMinimized.set(!isSidebarMinimized())" [title]="isSidebarMinimized() ? 'Expand Sidebar' : 'Collapse Sidebar'">
+        @if (isSidebarMinimized()) {
+          ▶
+        } @else {
+          ◀
+        }
+      </button>
+    </div>
+
+    <!-- Redesigned Nav Menu matching the drawing layout -->
+    <nav class="navigation-section">
+      <button 
+        class="nav-item-btn" 
+        [class.active]="activeTab() === 'DASHBOARD'" 
+        (click)="activeTab.set('DASHBOARD')"
+        title="Dashboard"
+      >
+        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        @if (!isSidebarMinimized()) {
+          Dashboard
+        }
+      </button>
+
+      <button 
+        class="nav-item-btn" 
+        [class.active]="activeTab() === 'MY_TASKS'" 
+        (click)="activeTab.set('MY_TASKS')"
+        title="My Tasks"
+      >
+        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 11 12 14 22 4"></polyline>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+        </svg>
+        @if (!isSidebarMinimized()) {
+          My Tasks
+        }
+      </button>
+
+      <button 
+        class="nav-item-btn" 
+        [class.active]="activeTab() === 'BOARDS'" 
+        (click)="activeTab.set('BOARDS')"
+        title="Boards"
+      >
+        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="9"></rect>
+          <rect x="14" y="3" width="7" height="5"></rect>
+          <rect x="14" y="12" width="7" height="9"></rect>
+          <rect x="3" y="16" width="7" height="5"></rect>
+        </svg>
+        @if (!isSidebarMinimized()) {
+          Boards
+        }
+      </button>
+
+      <button 
+        class="nav-item-btn" 
+        [class.active]="activeTab() === 'CALENDAR'" 
+        (click)="activeTab.set('CALENDAR')"
+        title="Calendar"
+      >
+        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        @if (!isSidebarMinimized()) {
+          Calendar
+        }
+      </button>
+
+      <button 
+        class="nav-item-btn" 
+        [class.active]="activeTab() === 'TEAM'" 
+        (click)="activeTab.set('TEAM')"
+        title="Team"
+      >
+        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        @if (!isSidebarMinimized()) {
+          Team
+        }
+      </button>
+
+      <button 
+        class="nav-item-btn" 
+        [class.active]="activeTab() === 'REPORTS'" 
+        (click)="activeTab.set('REPORTS')"
+        title="Reports"
+      >
+        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        @if (!isSidebarMinimized()) {
+          Reports
+        }
+      </button>
+
+      <button 
+        class="nav-item-btn" 
+        [class.active]="activeTab() === 'SETTINGS'" 
+        (click)="activeTab.set('SETTINGS')"
+        title="Settings"
+      >
+        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        @if (!isSidebarMinimized()) {
+          Settings
+        }
+      </button>
+    </nav>
+
+    <!-- Hide team collections when sidebar is minimized to prevent breaking grid layout -->
+    @if (!isSidebarMinimized()) {
+      <div class="sidebar-section" style="margin-top: 10px;">
+        <div class="section-header">
+          <h4>Teams</h4>
+          @if (currentUser()?.admin) {
+            <button class="btn-icon" (click)="showCreateTeam.set(true)" title="Create Team">+</button>
+          }
+        </div>
+        <div class="teams-list">
+          @for (team of teams(); track team.id) {
+            <button 
+              class="team-item" 
+              [class.active]="selectedTeam()?.id === team.id" 
+              (click)="selectTeam(team)"
+            >
+              <span class="team-icon">T</span>
+              {{ team.name }}
+            </button>
+          } @empty {
+            @if (currentUser()?.admin) {
+              <p class="empty-text">No teams created. Click + to start!</p>
+            } @else {
+              <p class="empty-text">No teams. Use the **Team** tab to request access.</p>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Active Team Members list -->
+      @if (selectedTeam()) {
+        <div class="sidebar-section members-section">
+          <div class="section-header">
+            <h4>Team Members</h4>
+            @if (isCurrentTeamOwner() || currentUser()?.admin) {
+              <button class="btn-icon" (click)="showAddMember.set(true)" title="Add Member">+</button>
+            }
+          </div>
+          <div class="members-list">
+            @for (member of teamMembers(); track member.id) {
+              <div class="member-item">
+                <span class="member-name">{{ member.username }}</span>
+                <span class="member-role" [class.owner]="member.role === 'OWNER'">
+                  {{ member.role }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </aside>
+
+  <!-- MAIN CONTAINER: Workspace Views -->
+  <main class="workspace">
+    @if (selectedTeam() || activeTab() === 'SETTINGS' || activeTab() === 'TEAM') {
+      
+      <!-- TOP NAVIGATION BAR (Search, Notification, Profile Dropdown) -->
+      <div class="workspace-top-bar">
+        <div class="top-bar-left">
+          <h2>Welcome back, {{ currentUser()?.username }}! 👋</h2>
+          <p class="subtitle">Here's what's happening today.</p>
+        </div>
+        <div class="top-bar-right">
+          <!-- Search Button -->
+          <button class="top-bar-btn" title="Search Tasks">
+            <svg class="top-bar-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+          
+          <!-- Notification Button with Badge Dropdown -->
+          <div class="notifications-container" style="position: relative;">
+            <button class="top-bar-btn notifications-btn" title="Alerts & Notifications" (click)="showNotificationsDropdown.set(!showNotificationsDropdown())">
+              <svg class="top-bar-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+              @if (unreadNotificationsCount() > 0) {
+                <span class="notification-badge-dot"></span>
+              }
+            </button>
+
+            <!-- Notifications Dropdown -->
+            @if (showNotificationsDropdown()) {
+              <div class="notifications-dropdown glass-card">
+                <div class="dropdown-header">
+                  <h4>Notifications ({{ unreadNotificationsCount() }})</h4>
+                  <button class="btn-text-close" (click)="showNotificationsDropdown.set(false)" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--color-text-muted);">×</button>
+                </div>
+                <div class="dropdown-body">
+                  @for (notif of unreadNotifications(); track notif.id) {
+                    <div class="notification-item" [class.unread]="!notif.isRead">
+                      <div class="notification-content">
+                        <strong>{{ notif.title }}</strong>
+                        <p>{{ notif.message }}</p>
+                        <span class="notification-time">{{ notif.createdAt | date:'MMM d, h:mm a' }}</span>
+                      </div>
+                      
+                      <div class="notification-actions">
+                        @if (notif.type === 'REQUEST' && !notif.isRead) {
+                          <button class="btn-approve-req" (click)="approveRequest(notif.requestId)">Approve</button>
+                          <button class="btn-deny-req" (click)="openDenialModal(notif.requestId)">Deny</button>
+                        } @else if (!notif.isRead) {
+                          <button class="btn-mark-read" (click)="markNotificationRead(notif.id)">✓</button>
+                        }
+                      </div>
+                    </div>
+                  } @empty {
+                    <p class="empty-notifications-text">No new alerts.</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- User Profile Avatar Circle -->
+          <div class="profile-avatar-container">
+            <button class="profile-avatar-btn" (click)="showProfileDropdown.set(!showProfileDropdown())">
+              {{ currentUser()?.username?.substring(0, 1)?.toUpperCase() }}
+            </button>
+            
+            <!-- User Actions Dropdown Panel -->
+            @if (showProfileDropdown()) {
+              <div class="profile-dropdown-menu glass-card">
+                <div class="dropdown-header">
+                  <strong>{{ currentUser()?.username }}</strong>
+                  <span class="dropdown-email">{{ currentUser()?.email }}</span>
+                  @if (currentUser()?.admin) {
+                    <span class="admin-badge-sm">Admin</span>
+                  }
+                </div>
+                <div class="dropdown-divider"></div>
+                
+                @if (currentUser()?.admin) {
+                  <button class="dropdown-item" routerLink="/admin" (click)="showProfileDropdown.set(false)">
+                    ⚙️ System Admin Panel
+                  </button>
+                }
+
+                <button class="dropdown-item" (click)="activeTab.set('SETTINGS'); showProfileDropdown.set(false)">
+                  👤 Account Settings
+                </button>
+                
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item logout-btn" (click)="logout(); showProfileDropdown.set(false)">
+                  🚪 Log Out
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           VIEW 1: PERSONAL DASHBOARD OVERVIEW
+           ========================================== -->
+      @if (activeTab() === 'DASHBOARD') {
+        <!-- Metrics Cards Grid -->
+        <section class="metrics-grid" style="margin-top: 10px;">
+          <div class="metric-card glass-card">
+            <span class="metric-title">My Tasks</span>
+            <div class="metric-value-container">
+              <span class="metric-number">{{ myTasksCount() }}</span>
+              <span class="metric-unit">tasks</span>
+            </div>
+          </div>
+          
+          <div class="metric-card glass-card">
+            <span class="metric-title">In Progress</span>
+            <div class="metric-value-container">
+              <span class="metric-number">{{ inProgressTasksCount() }}</span>
+              <span class="metric-unit">tasks</span>
+            </div>
+          </div>
+
+          <div class="metric-card glass-card">
+            <span class="metric-title">Completed</span>
+            <div class="metric-value-container">
+              <span class="metric-number">{{ completedTasksCount() }}</span>
+              <span class="metric-unit">tasks</span>
+            </div>
+          </div>
+
+          <div class="metric-card glass-card overdue">
+            <span class="metric-title">Overdue</span>
+            <div class="metric-value-container">
+              <span class="metric-number">{{ overdueTasksCount() }}</span>
+              <span class="metric-unit">tasks</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Dashboard Columns -->
+        <section class="dashboard-widgets-layout">
+          <!-- Widget Column 1: Checklist & Activities -->
+          <div class="widgets-column">
+            
+            <!-- Checklist Card -->
+            <div class="widget-card glass-card">
+              <div class="widget-card-header">
+                <h3>My Tasks</h3>
+              </div>
+              <div class="widget-checklist">
+                @for (task of myTasks(); track task.id) {
+                  <div class="checklist-item" [class.completed]="task.status === 'DONE'">
+                    <label class="checkbox-container">
+                      <input 
+                        type="checkbox" 
+                        [checked]="task.status === 'DONE'" 
+                        (change)="toggleTaskCompletion(task, $event)" 
+                      />
+                      <span class="checkmark"></span>
+                    </label>
+                    <span class="task-title">{{ task.title }}</span>
+                    <span class="priority-badge" [class]="task.priority.toLowerCase()">
+                      {{ task.priority }}
+                    </span>
+                    <span class="task-date">{{ task.dueDate | date:'MMM d' }}</span>
+                  </div>
+                } @empty {
+                  <p class="empty-widget-text">No tasks assigned to you yet.</p>
+                }
+              </div>
+            </div>
+
+            <!-- Team Activity Card -->
+            <div class="widget-card glass-card">
+              <div class="widget-card-header">
+                <h3>Team Activity</h3>
+              </div>
+              <div class="activity-list">
+                @for (activity of teamActivities(); track activity.id) {
+                  <div class="activity-item">
+                    <span class="activity-dot"></span>
+                    <p><strong>{{ activity.actor }}</strong> {{ activity.action }} <span class="time-ago">{{ activity.timeAgo }}</span></p>
+                  </div>
+                } @empty {
+                  <p class="empty-widget-text" style="padding: 10px 0; font-size: 0.9rem; color: var(--color-text-muted);">No workspace activity recorded yet.</p>
+                }
+              </div>
+            </div>
+
+            <!-- Team Workload Card -->
+            <div class="widget-card glass-card">
+              <div class="widget-card-header">
+                <h3>Team Workload</h3>
+              </div>
+              <div class="workload-list" style="display: flex; flex-direction: column; gap: 16px;">
+                @for (member of teamWorkloads(); track member.username) {
+                  <div class="workload-item" style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-size: 0.95rem; font-weight: 600; color: var(--color-text-main);">{{ member.username }}</span>
+                      <span style="font-size: 0.82rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: rgba(52, 71, 170, 0.08); color: var(--color-primary);">
+                        {{ member.activeCount }} active {{ member.activeCount === 1 ? 'task' : 'tasks' }}
+                      </span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden; position: relative;">
+                      <div [style.width.%]="member.progress" style="height: 100%; background: var(--color-success); border-radius: 3px; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--color-text-muted);">
+                      <span>Progress</span>
+                      <span>{{ member.progress }}% completed</span>
+                    </div>
+                  </div>
+                } @empty {
+                  <p class="empty-widget-text" style="padding: 10px 0; font-size: 0.9rem; color: var(--color-text-muted);">No active team members.</p>
+                }
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Widget Column 2: Donut Stats & Events -->
+          <div class="widgets-column">
+            
+            <!-- Tasks Overview SVG Donut Chart Card -->
+            <div class="widget-card glass-card flex-center-column">
+              <div class="widget-card-header" style="width: 100%;">
+                <h3>Tasks Overview</h3>
+              </div>
+              
+              @if (myTasksCount() > 0) {
+                <div class="donut-chart-container">
+                  <svg class="donut-chart-large" viewBox="0 0 36 36">
+                    <circle class="donut-ring" cx="18" cy="18" r="15.915" fill="transparent" stroke="#F1F5F9" stroke-width="4"></circle>
+                    
+                    <!-- Segment Todo (Pending): Amber -->
+                    <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
+                      stroke="#F59E0B" stroke-width="4" 
+                      [attr.stroke-dasharray]="getStrokeDashArray(myTasksCount() - inProgressTasksCount() - completedTasksCount())" 
+                      stroke-dashoffset="25"></circle>
+
+                    <!-- Segment In Progress: Royal Blue -->
+                    <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
+                      stroke="#3447AA" stroke-width="4" 
+                      [attr.stroke-dasharray]="getStrokeDashArray(inProgressTasksCount())" 
+                      [attr.stroke-dashoffset]="25 + getStrokeDashOffset(myTasksCount() - inProgressTasksCount() - completedTasksCount())"></circle>
+
+                    <!-- Segment Completed: Vibrant Rose -->
+                    <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
+                      stroke="#EC4899" stroke-width="4" 
+                      [attr.stroke-dasharray]="getStrokeDashArray(completedTasksCount())" 
+                      [attr.stroke-dashoffset]="25 + getStrokeDashOffset(myTasksCount() - inProgressTasksCount() - completedTasksCount(), inProgressTasksCount())"></circle>
+                  </svg>
+                  
+                  <div class="donut-center-label">
+                    <span class="donut-number">{{ myTasksCount() }}</span>
+                    <span class="donut-label">Total</span>
+                  </div>
+                </div>
+
+                <div class="donut-legend-horizontal">
+                  <div class="legend-item"><span class="bullet todo"></span> Pending ({{ myTasksCount() - inProgressTasksCount() - completedTasksCount() }})</div>
+                  <div class="legend-item"><span class="bullet in-prog"></span> Active ({{ inProgressTasksCount() }})</div>
+                  <div class="legend-item"><span class="bullet done"></span> Completed ({{ completedTasksCount() }})</div>
+                </div>
+              } @else {
+                <p class="empty-widget-text" style="margin: auto 0;">No task statistics available.</p>
+              }
+            </div>
+
+            <!-- Upcoming Events Card -->
+            <div class="widget-card glass-card">
+              <div class="widget-card-header">
+                <h3>Upcoming</h3>
+              </div>
+              <div class="events-list">
+                @for (task of upcomingEvents(); track task.id) {
+                  <div class="event-item">
+                    <span class="event-icon" [class.warning]="task.priority === 'HIGH'">📅</span>
+                    <div class="event-details">
+                      <strong>{{ task.title }}</strong>
+                      <p>{{ task.dueDate | date:'MMM d, y' }} — {{ task.priority }}</p>
+                    </div>
+                  </div>
+                } @empty {
+                  <p class="empty-widget-text" style="padding: 10px 0; font-size: 0.9rem; color: var(--color-text-muted);">No upcoming active deadlines.</p>
+                }
+              </div>
+            </div>
+
+          </div>
+        </section>
+      }
+
+      <!-- ==========================================
+           VIEW 1.2: DEDICATED FULL-SCREEN MY TASKS
+           ========================================== -->
+      @if (activeTab() === 'MY_TASKS') {
+        <header class="workspace-header" style="margin-top: 15px;">
+          <div class="board-selector-section">
+            <h2>My Assigned Tasks</h2>
+            <p class="subtitle">Complete your pending checklist tasks below</p>
+          </div>
+        </header>
+
+        <section class="dashboard-widgets-layout" style="grid-template-columns: 1fr; margin-top: 10px;">
+          <div class="widget-card glass-card">
+            <div class="widget-card-header">
+              <h3>Active Task List</h3>
+            </div>
+            <div class="widget-checklist">
+              @for (task of myTasks(); track task.id) {
+                <div class="checklist-item" [class.completed]="task.status === 'DONE'">
+                  <label class="checkbox-container">
+                    <input 
+                      type="checkbox" 
+                      [checked]="task.status === 'DONE'" 
+                      (change)="toggleTaskCompletion(task, $event)" 
+                    />
+                    <span class="checkmark"></span>
+                  </label>
+                  <span class="task-title" style="font-size: 1rem;">{{ task.title }}</span>
+                  <span class="priority-badge" [class]="task.priority.toLowerCase()">
+                    {{ task.priority }}
+                  </span>
+                  <span class="task-date">{{ task.dueDate | date:'mediumDate' }}</span>
+                </div>
+              } @empty {
+                <p class="empty-widget-text">No tasks assigned to you yet.</p>
+              }
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ==========================================
+           VIEW 1.3: DEDICATED FULL-SCREEN CALENDAR
+           ========================================== -->
+      @if (activeTab() === 'CALENDAR') {
+        <header class="workspace-header" style="margin-top: 15px;">
+          <div class="board-selector-section">
+            <h2>Calendar & Upcoming Deadlines</h2>
+            <p class="subtitle">Key milestones and scheduled meetings</p>
+          </div>
+        </header>
+
+        <section class="dashboard-widgets-layout" style="grid-template-columns: 1fr; margin-top: 10px;">
+          <div class="widget-card glass-card">
+            <div class="widget-card-header">
+              <h3>Deadlines Schedule</h3>
+            </div>
+            <div class="events-list" style="gap: 16px;">
+              @for (task of getTasksWithDueDate(); track task.id) {
+                <div class="event-item" style="padding: 20px; align-items: flex-start; gap: 16px;">
+                  <span class="event-icon" [class.warning]="task.priority === 'HIGH'" style="width: 48px; height: 48px; font-size: 1.8rem; display: flex; justify-content: center; align-items: center;">📅</span>
+                  <div class="event-details" style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                      <strong style="font-size: 1.1rem; color: var(--color-text-main);">{{ task.title }}</strong>
+                      <span class="priority-badge" [class]="task.priority.toLowerCase()">{{ task.priority }}</span>
+                    </div>
+                    <p style="font-size: 0.9rem; margin-top: 4px; color: var(--color-text-muted);">
+                      Due Date: <strong>{{ task.dueDate | date:'MMMM d, y' }}</strong> &nbsp;|&nbsp; Status: <strong>{{ task.status }}</strong>
+                    </p>
+                    @if (task.description) {
+                      <p style="font-size: 0.88rem; color: var(--color-text-muted); margin-top: 8px; border-left: 3px solid rgba(52, 71, 170, 0.15); padding-left: 10px; font-style: italic;">
+                        {{ task.description }}
+                      </p>
+                    }
+                  </div>
+                </div>
+              } @empty {
+                <div style="padding: 40px; text-align: center; color: var(--color-text-muted);">
+                  <p style="font-size: 1.1rem; font-weight: 600;">No scheduled tasks found.</p>
+                  <p style="font-size: 0.9rem; margin-top: 4px;">Seeded tasks or tasks created with due dates will appear here chronologically!</p>
+                </div>
+              }
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ==========================================
+           VIEW 2: ORIGINAL KANBAN BOARD WORKSPACE
+           ========================================== -->
+      @if (activeTab() === 'BOARDS') {
+        <header class="workspace-header" style="margin-top: 15px;">
+          <div class="board-selector-section">
+            <h2>{{ selectedTeam()?.name }} Workspace</h2>
+            <div class="board-selector">
+              <select [ngModel]="selectedBoard()" (ngModelChange)="selectBoard($event)">
+                @for (board of boards(); track board.id) {
+                  <option [ngValue]="board">{{ board.name }}</option>
+                }
+              </select>
+              <button class="btn-primary-sm" (click)="showCreateBoard.set(true)">+ Board</button>
+            </div>
+          </div>
+
+          <!-- Progress ring representing Board Stats -->
+          @if (selectedBoard() && boardStats()) {
+            <div class="stats-widget glass-card">
+              <svg class="donut-chart" viewBox="0 0 36 36">
+                <circle class="donut-ring" cx="18" cy="18" r="15.915" fill="transparent" stroke="#F1F5F9" stroke-width="3"></circle>
+                
+                <circle class="donut-segment todo" cx="18" cy="18" r="15.915" fill="transparent" 
+                  stroke="#F59E0B" stroke-width="3" 
+                  [attr.stroke-dasharray]="getStrokeDashArray(boardStats()!.todoCount)" 
+                  stroke-dashoffset="25"></circle>
+
+                <circle class="donut-segment in-progress" cx="18" cy="18" r="15.915" fill="transparent" 
+                  stroke="#3447AA" stroke-width="3" 
+                  [attr.stroke-dasharray]="getStrokeDashArray(boardStats()!.inProgressCount)" 
+                  [attr.stroke-dashoffset]="25 + getStrokeDashOffset(boardStats()!.todoCount)"></circle>
+
+                <circle class="donut-segment done" cx="18" cy="18" r="15.915" fill="transparent" 
+                  stroke="#EC4899" stroke-width="3" 
+                  [attr.stroke-dasharray]="getStrokeDashArray(boardStats()!.doneCount)" 
+                  [attr.stroke-dashoffset]="25 + getStrokeDashOffset(boardStats()!.todoCount, boardStats()!.inProgressCount)"></circle>
+              </svg>
+              <div class="stats-legend">
+                <div class="legend-item"><span class="bullet todo"></span> To Do ({{ boardStats()?.todoCount }})</div>
+                <div class="legend-item"><span class="bullet in-prog"></span> In Progress ({{ boardStats()?.inProgressCount }})</div>
+                <div class="legend-item"><span class="bullet done"></span> Done ({{ boardStats()?.doneCount }})</div>
+              </div>
+            </div>
+          }
+        </header>
+
+        <!-- Filters Bar -->
+        <section class="filter-bar glass-card">
+          <div class="filter-group">
+            <label>Priority:</label>
+            <select [ngModel]="selectedPriorityFilter()" (ngModelChange)="selectedPriorityFilter.set($event)">
+              <option value="ALL">All Priorities</option>
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Assignee:</label>
+            <select [ngModel]="selectedAssigneeFilter()" (ngModelChange)="selectedAssigneeFilter.set($event)">
+              <option value="ALL">All Assignees</option>
+              @for (user of allUsers(); track user.id) {
+                <option [value]="user.id">{{ user.username }}</option>
+              }
+            </select>
+          </div>
+
+          <button class="btn-primary-sm add-list-btn" (click)="showCreateList.set(true)">+ Add Column</button>
+        </section>
+
+        <!-- Column Grid columns -->
+        <section class="kanban-board">
+          @for (list of lists(); track list.id) {
+            <div class="kanban-column glass-card">
+              <div class="column-header">
+                <h3>{{ list.name }}</h3>
+                <div class="column-actions">
+                  <button class="btn-action-icon" (click)="openCreateTaskModal(list.id)" title="Add Task">+</button>
+                  <button class="btn-action-icon danger" (click)="deleteList(list.id)" title="Delete Column">×</button>
+                </div>
+              </div>
+
+              <!-- Tasks Container -->
+              <div class="tasks-list">
+                @for (task of getFilteredTasks(list.id); track task.id) {
+                  <div class="task-card">
+                    <div class="task-card-header">
+                      <span class="priority-badge" [class]="task.priority.toLowerCase()">
+                        {{ task.priority }}
+                      </span>
+                      <button class="btn-card-delete" (click)="deleteTask(task)">×</button>
+                    </div>
+                    <h4>{{ task.title }}</h4>
+                    <p class="task-desc">{{ task.description }}</p>
+                    
+                    <div class="task-card-footer">
+                      <div class="due-date">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {{ task.dueDate | date:'MMM d' }}
+                      </div>
+
+                      <div class="move-controls">
+                        <button (click)="moveTask(task, 'left')" title="Move Left">&lt;</button>
+                        <button (click)="moveTask(task, 'right')" title="Move Right">&gt;</button>
+                      </div>
+                    </div>
+                  </div>
+                } @empty {
+                  <p class="empty-column-text">No tasks here.</p>
+                }
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-board-banner glass-card">
+              <h3>No columns found in this board.</h3>
+              <p>Create a column (like "To Do") using the **Add Column** button above!</p>
+            </div>
+          }
+        </section>
+      }
+
+      <!-- ==========================================
+           VIEW 3: TEAM WORKSPACE SETTINGS
+           ========================================== -->
+      @if (activeTab() === 'TEAM') {
+        <section class="team-workspace-panel glass-card" style="margin-top: 20px; padding: 30px;">
+          <div class="table-header">
+            <h3>Teams Management</h3>
+            @if (currentUser()?.admin) {
+              <button class="btn-primary-sm" (click)="showCreateTeam.set(true)">+ Create Team</button>
+            } @else {
+              <button class="btn-primary-sm" (click)="showJoinRequestModal.set(true)">👋 Request to Join Team</button>
+            }
+          </div>
+          
+          <div class="teams-grid-layout" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+            @for (team of teams(); track team.id) {
+              <div class="team-card-detail glass-card" [class.selected]="selectedTeam()?.id === team.id" (click)="selectTeam(team)" style="padding: 20px; cursor: pointer; border: 1px solid rgba(52, 71, 170, 0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--color-text-main);">{{ team.name }}</h4>
+                  <span style="font-size: 0.75rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: rgba(52, 71, 170, 0.08); color: var(--color-primary);">Active</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--color-text-muted);">Select this team to display member rosters and boards.</p>
+              </div>
+            }
+          </div>
+
+          @if (selectedTeam()) {
+            <div class="members-roster-section" style="margin-top: 40px; border-top: 1px solid rgba(52, 71, 170, 0.1); padding-top: 30px;">
+              <div class="table-header">
+                <h3>Roster for {{ selectedTeam()?.name }}</h3>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                  @if (isCurrentTeamOwner() || currentUser()?.admin) {
+                    <button class="btn-primary-sm" (click)="showAddMember.set(true)">+ Add Member</button>
+                    <button class="btn-danger-sm" (click)="onDeleteTeam(selectedTeam()!, $event)">Delete Team</button>
+                  }
+                </div>
+              </div>
+              <div class="members-table-container" style="margin-top: 20px;">
+                <table class="users-table" style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left; padding: 12px;">Username</th>
+                      <th style="text-align: left; padding: 12px;">Role</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (member of teamMembers(); track member.id) {
+                      <tr>
+                        <td style="padding: 12px;">
+                          <strong>{{ member.username }}</strong>
+                        </td>
+                        <td style="padding: 12px;">
+                          <span class="role-badge" [class.admin]="member.role === 'OWNER'">
+                            {{ member.role }}
+                          </span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+        </section>
+      }
+
+      <!-- ==========================================
+           VIEW 4: REPORTS VIEW
+           ========================================== -->
+      @if (activeTab() === 'REPORTS') {
+        <section class="reports-panel glass-card" style="margin-top: 20px; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 30px;">
+          <h3>Overall Productivity Analytics</h3>
+          <div class="donut-chart-container" style="width: 260px; height: 260px;">
+            <svg class="donut-chart-large" viewBox="0 0 36 36">
+              <circle class="donut-ring" cx="18" cy="18" r="15.915" fill="transparent" stroke="#F1F5F9" stroke-width="4"></circle>
+              
+              <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
+                stroke="#F59E0B" stroke-width="4" 
+                [attr.stroke-dasharray]="getStrokeDashArray(myTasksCount() - inProgressTasksCount() - completedTasksCount())" 
+                stroke-dashoffset="25"></circle>
+
+              <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
+                stroke="#3447AA" stroke-width="4" 
+                [attr.stroke-dasharray]="getStrokeDashArray(inProgressTasksCount())" 
+                [attr.stroke-dashoffset]="25 + getStrokeDashOffset(myTasksCount() - inProgressTasksCount() - completedTasksCount())"></circle>
+
+              <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
+                stroke="#EC4899" stroke-width="4" 
+                [attr.stroke-dasharray]="getStrokeDashArray(completedTasksCount())" 
+                [attr.stroke-dashoffset]="25 + getStrokeDashOffset(myTasksCount() - inProgressTasksCount() - completedTasksCount(), inProgressTasksCount())"></circle>
+            </svg>
+            <div class="donut-center-label">
+              <span class="donut-number" style="font-size: 2.2rem;">{{ myTasksCount() }}</span>
+              <span class="donut-label">Total Tasks</span>
+            </div>
+          </div>
+          <div class="donut-legend-horizontal" style="max-width: 500px;">
+            <div class="legend-item"><span class="bullet todo"></span> Pending Tasks ({{ myTasksCount() - inProgressTasksCount() - completedTasksCount() }})</div>
+            <div class="legend-item"><span class="bullet in-prog"></span> Active Tasks ({{ inProgressTasksCount() }})</div>
+            <div class="legend-item"><span class="bullet done"></span> Completed Tasks ({{ completedTasksCount() }})</div>
+          </div>
+        </section>
+      }
+
+      <!-- ==========================================
+           VIEW 5: SETTINGS & ACCOUNT PANEL
+           ========================================== -->
+      @if (activeTab() === 'SETTINGS') {
+        <section class="settings-panel glass-card" style="margin-top: 20px; padding: 40px; max-width: 700px; display: flex; flex-direction: column; gap: 24px;">
+          <h3>Account Settings</h3>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted);">Username</label>
+            <input type="text" [value]="currentUser()?.username" readonly style="background: #F1F5F9; color: var(--color-text-muted);" />
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted);">Email Address</label>
+            <input type="text" [value]="currentUser()?.email" readonly style="background: #F1F5F9; color: var(--color-text-muted);" />
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted);">Account Level</label>
+            <input type="text" [value]="currentUser()?.admin ? 'System Administrator' : 'Standard User'" readonly style="background: #F1F5F9; color: var(--color-text-muted);" />
+          </div>
+          <div style="margin-top: 10px;">
+            <button class="btn-primary" (click)="logout()">Sign Out of Account</button>
+          </div>
+        </section>
+      }
+
+    } @else {
+      <div class="empty-state glass-card">
+        <h2>Welcome to Taskly!</h2>
+        @if (currentUser()?.admin) {
+          <p>You are not active in any teams. Use the **Team** tab on the left sidebar to create a team and invite collaborators!</p>
+        } @else {
+          <p>You are not active in any teams. Use the **Team** tab on the left sidebar to send a Request to Join an existing team to a system administrator!</p>
+        }
+      </div>
+    }
+  </main>
+
+  <!-- ==========================================
+       OVERLAY DIALOGS (MODALS)
+       ========================================== -->
+
+  <!-- Create Team Modal -->
+  @if (showCreateTeam()) {
+    <div class="modal-overlay">
+      <div class="modal-card glass-card">
+        <h3>Create New Team</h3>
+        <div class="form-group">
+          <label>Team Name</label>
+          <input type="text" [(ngModel)]="newTeamName" placeholder="e.g. Frontend Development" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="showCreateTeam.set(false)">Cancel</button>
+          <button class="btn-primary" (click)="onCreateTeamSubmit()">Create</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Add Member Modal -->
+  @if (showAddMember()) {
+    <div class="modal-overlay">
+      <div class="modal-card glass-card">
+        <h3>Add Team Member</h3>
+        <div class="form-group">
+          <label>Member Email</label>
+          <select [(ngModel)]="newMemberEmail">
+            <option value="">Select a user...</option>
+            @for (user of allUsers(); track user.id) {
+              <option [value]="user.email">{{ user.username }} ({{ user.email }})</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Role</label>
+          <select [(ngModel)]="newMemberRole">
+            <option value="MEMBER">Member</option>
+            <option value="OWNER">Owner (Admin)</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="showAddMember.set(false)">Cancel</button>
+          <button class="btn-primary" (click)="onAddMemberSubmit()">Add Member</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Create Board Modal -->
+  @if (showCreateBoard()) {
+    <div class="modal-overlay">
+      <div class="modal-card glass-card">
+        <h3>Create New Board</h3>
+        <div class="form-group">
+          <label>Board Name</label>
+          <input type="text" [(ngModel)]="newBoardName" placeholder="e.g. Sprint 1 Planning" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="showCreateBoard.set(false)">Cancel</button>
+          <button class="btn-primary" (click)="onCreateBoardSubmit()">Create</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Create List (Column) Modal -->
+  @if (showCreateList()) {
+    <div class="modal-overlay">
+      <div class="modal-card glass-card">
+        <h3>Add Column</h3>
+        <div class="form-group">
+          <label>Column Name</label>
+          <input type="text" [(ngModel)]="newListName" placeholder="e.g. In Progress" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="showCreateList.set(false)">Cancel</button>
+          <button class="btn-primary" (click)="onCreateListSubmit()">Add</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Create Task Modal -->
+  @if (showCreateTask()) {
+    <div class="modal-overlay">
+      <div class="modal-card glass-card">
+        <h3>Create Task</h3>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" [(ngModel)]="newTaskTitle" placeholder="Task name" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="newTaskDesc" placeholder="Task details/notes"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select [(ngModel)]="newTaskPriority">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" [(ngModel)]="newTaskDueDate" />
+        </div>
+        <div class="form-group">
+          <label>Assignee</label>
+          <select [(ngModel)]="newTaskAssigneeId">
+            <option value="">Unassigned</option>
+            @for (user of allUsers(); track user.id) {
+              <option [value]="user.id">{{ user.username }} ({{ user.email }})</option>
+            }
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="showCreateTask.set(false)">Cancel</button>
+          <button class="btn-primary" (click)="onCreateTaskSubmit()">Create Task</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Request to Join Team Modal -->
+  @if (showJoinRequestModal()) {
+    <div class="modal-overlay">
+      <div class="modal-card glass-card">
+        <h3>Request to Join Team</h3>
+        <div class="form-group">
+          <label>Select Team</label>
+          <select [(ngModel)]="selectedTeamToJoin" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.1);">
+            <option value="">Select a team...</option>
+            @for (team of teams(); track team.id) {
+              <option [value]="team.id">{{ team.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group" style="margin-top:15px;">
+          <label>Select Administrator</label>
+          <select [(ngModel)]="selectedAdminToJoin" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.1);">
+            <option value="">Select an admin...</option>
+            @for (admin of adminsList(); track admin.id) {
+              <option [value]="admin.id">{{ admin.username }} ({{ admin.email }})</option>
+            }
+          </select>
+        </div>
+        <div class="modal-actions" style="margin-top:20px;">
+          <button class="btn-secondary" (click)="showJoinRequestModal.set(false)">Cancel</button>
+          <button class="btn-primary" (click)="submitJoinRequest()">Send Request</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Denial Reason Modal -->
+  @if (showDenialReasonModal()) {
+    <div class="modal-overlay">
+      <div class="modal-card glass-card">
+        <h3>Deny Join Request</h3>
+        <div class="form-group">
+          <label>Reason for Denial</label>
+          <input type="text" [(ngModel)]="denialReasonInput" placeholder="Specify why this request is denied" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.1);" />
+        </div>
+        <div class="modal-actions" style="margin-top:20px;">
+          <button class="btn-secondary" (click)="showDenialReasonModal.set(false)">Cancel</button>
+          <button class="btn-primary danger" (click)="submitDenyRequest()" style="background: var(--color-danger);">Deny Request</button>
+        </div>
+      </div>
+    </div>
+  }
+  <!-- Confirmation Modal -->
+  @if (showConfirmModal()) {
+    <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.45); z-index: 99999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+      <div class="glass-card" style="max-width: 400px; width: 90%; text-align: center; padding: 30px; background: #FFFFFF; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.05);">
+        <h3 style="margin-bottom: 15px; color: var(--color-text-main); font-size: 1.25rem; font-weight: 700;">Confirm Action</h3>
+        <p style="font-size: 0.95rem; color: var(--color-text-muted); margin-bottom: 25px; line-height: 1.5;">{{ confirmMessage() }}</p>
+        <div style="display: flex; justify-content: center; gap: 16px;">
+          <button style="background: #F1F5F9; color: var(--color-text-main); border: 1px solid rgba(0,0,0,0.05); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;" (click)="showConfirmModal.set(false)">Cancel</button>
+          <button style="background: var(--color-danger); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;" (click)="onConfirmSubmit()">Confirm</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Dynamic Toast System -->
+  <div class="toast-container">
+    @for (toast of toasts(); track toast.id) {
+      <div class="toast-card" [class]="toast.type">
+        <span class="toast-message">{{ toast.message }}</span>
+        <button class="btn-toast-close" (click)="toasts.update(list => list.filter(t => t.id !== toast.id))">×</button>
+      </div>
+    }
+  </div>
+
+</div>

@@ -1,0 +1,95 @@
+<div class="admin-container">
+  <div class="admin-header glass-card">
+    <div class="header-left">
+      <a routerLink="/dashboard" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Dashboard
+      </a>
+      <h2>System Administration</h2>
+      <p class="subtitle">Monitor users, assign global privileges, and manage accounts</p>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-banner">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <div class="admin-content glass-card">
+    <div class="table-header">
+      <h3>Registered Users</h3>
+      @if (isLoading()) {
+        <span class="loading-indicator">Loading users...</span>
+      }
+    </div>
+
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email Address</th>
+          <th>Role</th>
+          <th>Created At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of users(); track user.id) {
+          <tr>
+            <td>
+              <div class="user-info">
+                <span class="user-avatar">{{ user.username.substring(0, 2).toUpperCase() }}</span>
+                <strong>{{ user.username }}</strong>
+              </div>
+            </td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span class="role-badge" [class.admin]="user.admin">
+                {{ user.admin ? 'System Admin' : 'Standard User' }}
+              </span>
+            </td>
+            <td>{{ user.createdAt | date:'mediumDate' }}</td>
+            <td>
+              <div class="action-buttons">
+                <button 
+                  class="btn-action" 
+                  (click)="toggleAdmin(user)"
+                >
+                  {{ user.admin ? 'Demote' : 'Promote' }}
+                </button>
+                <button 
+                  class="btn-action btn-danger" 
+                  (click)="deleteUser(user)"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="empty-row">No users registered in the system.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Confirmation Modal -->
+  @if (showConfirmModal()) {
+    <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.45); z-index: 99999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+      <div class="glass-card" style="max-width: 400px; width: 90%; text-align: center; padding: 30px; background: #FFFFFF; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.05);">
+        <h3 style="margin-bottom: 15px; color: var(--color-text-main); font-size: 1.25rem; font-weight: 700;">Confirm Action</h3>
+        <p style="font-size: 0.95rem; color: var(--color-text-muted); margin-bottom: 25px; line-height: 1.5;">{{ confirmMessage() }}</p>
+        <div style="display: flex; justify-content: center; gap: 16px;">
+          <button style="background: #F1F5F9; color: var(--color-text-main); border: 1px solid rgba(0,0,0,0.05); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;" (click)="showConfirmModal.set(false)">Cancel</button>
+          <button style="background: var(--color-danger); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;" (click)="onConfirmSubmit()">Confirm</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>
