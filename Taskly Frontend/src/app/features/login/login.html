@@ -1,86 +1,206 @@
-<div class="auth-container">
-  
-  <!-- Left Side: Brand Visuals -->
-  <div class="auth-banner-side">
-    <div class="banner-card">
-      <img src="/logo.png" alt="Taskly Logo" class="banner-logo" />
-      <p class="banner-tagline">
-        Streamline collaborative pipelines, track milestones in real-time, and manage deadlines elegantly.
-      </p>
-    </div>
-  </div>
-
-  <!-- Right Side: Action Forms -->
-  <div class="auth-form-side">
-    <div class="auth-card">
-      <div class="auth-header">
-        <h2 style="font-size: 2rem; font-weight: 800; color: var(--color-primary); margin-bottom: 8px;">Welcome Back</h2>
-        <p class="subtitle">Securely log in to manage your workspaces</p>
-      </div>
-
-      <form (ngSubmit)="onSubmit()">
-        @if (errorMessage()) {
-          <div class="error-banner">
-            {{ errorMessage() }}
-          </div>
-        }
-
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            [(ngModel)]="email"
-            placeholder="e.g. fabrice@example.com"
-            required
-          />
+<div class="auth-wrapper" [class.show-signup]="isSignUp()">
+  <div class="auth-container">
+    
+    <!-- Sign Up Form (Revealed on the Left side when active) -->
+    <div class="form-container signup-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2 style="font-size: 2rem; font-weight: 800; color: var(--color-primary); margin-bottom: 8px;">Create Account</h2>
+          <p class="subtitle">Join Taskly and manage collaborative task pipelines</p>
         </div>
 
-        <div class="form-group">
-          <label for="password">Password</label>
-          <div class="password-input-container">
+        <form (ngSubmit)="onRegisterSubmit()">
+          @if (isSignUp() && errorMessage()) {
+            <div class="error-banner">
+              {{ errorMessage() }}
+            </div>
+          }
+
+          @if (successMessage()) {
+            <div class="success-banner">
+              {{ successMessage() }}
+            </div>
+          }
+
+          <div class="form-group">
+            <label for="reg-username">Username</label>
             <input
-              [type]="showPassword() ? 'text' : 'password'"
-              id="password"
-              name="password"
-              [(ngModel)]="password"
-              placeholder="••••••••"
+              type="text"
+              id="reg-username"
+              name="username"
+              [(ngModel)]="username"
+              placeholder="e.g. Fabrice"
               required
             />
-            <button 
-              type="button" 
-              class="btn-toggle-password" 
-              (click)="showPassword.set(!showPassword())"
-              [title]="showPassword() ? 'Hide Password' : 'Show Password'"
-            >
-              @if (showPassword()) {
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>
-                </svg>
-              } @else {
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-              }
-            </button>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-email">Email Address</label>
+            <input
+              type="email"
+              id="reg-email"
+              name="registerEmail"
+              [(ngModel)]="registerEmail"
+              placeholder="e.g. fabrice@example.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <div class="password-input-container">
+              <input
+                [type]="showRegisterPassword() ? 'text' : 'password'"
+                id="reg-password"
+                name="registerPassword"
+                [(ngModel)]="registerPassword"
+                placeholder="Minimum 6 characters"
+                required
+              />
+              <button 
+                type="button" 
+                class="btn-toggle-password" 
+                (click)="showRegisterPassword.set(!showRegisterPassword())"
+                [title]="showRegisterPassword() ? 'Hide Password' : 'Show Password'"
+              >
+                @if (showRegisterPassword()) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                }
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary auth-submit-btn" [disabled]="isLoading()">
+            @if (isLoading()) {
+              Creating account...
+            } @else {
+              Register Account
+            }
+          </button>
+        </form>
+
+        <div class="auth-footer mobile-only">
+          <p>Already have an account? <a (click)="toggleMode(false)" class="auth-link">Log In</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sign In Form (Visible on the Right side by default) -->
+    <div class="form-container login-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2 style="font-size: 2rem; font-weight: 800; color: var(--color-primary); margin-bottom: 8px;">Welcome Back</h2>
+          <p class="subtitle">Securely log in to manage your workspaces</p>
+        </div>
+
+        <form (ngSubmit)="onLoginSubmit()">
+          @if (!isSignUp() && errorMessage()) {
+            <div class="error-banner">
+              {{ errorMessage() }}
+            </div>
+          }
+
+          <div class="form-group">
+            <label for="login-email">Email Address</label>
+            <input
+              type="email"
+              id="login-email"
+              name="email"
+              [(ngModel)]="email"
+              placeholder="e.g. fabrice@example.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <div class="password-input-container">
+              <input
+                [type]="showPassword() ? 'text' : 'password'"
+                id="login-password"
+                name="password"
+                [(ngModel)]="password"
+                placeholder="••••••••"
+                required
+              />
+              <button 
+                type="button" 
+                class="btn-toggle-password" 
+                (click)="showPassword.set(!showPassword())"
+                [title]="showPassword() ? 'Hide Password' : 'Show Password'"
+              >
+                @if (showPassword()) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                }
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary auth-submit-btn" [disabled]="isLoading()">
+            @if (isLoading()) {
+              Logging in...
+            } @else {
+              Log In
+            }
+          </button>
+        </form>
+
+        <div class="auth-footer mobile-only">
+          <p>Don't have an account? <a (click)="toggleMode(true)" class="auth-link">Sign Up</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sliding Visual Cover Overlay -->
+    <div class="overlay-container">
+      <div class="overlay">
+        
+        <!-- Left Overlay (Active when user is on Sign Up view) -->
+        <div class="overlay-panel overlay-left">
+          <div class="banner-card">
+            <img src="/logo.png" alt="Taskly Logo" class="banner-logo" />
+            <p class="banner-tagline">
+              Streamline collaborative pipelines, track milestones in real-time, and manage deadlines elegantly.
+            </p>
+          </div>
+          <div class="overlay-content">
+            <h2>Already have an account?</h2>
+            <p>Your projects are right where you left them. Sign in and pick up the thread.</p>
+            <button class="btn-ghost" (click)="toggleMode(false)">Back to sign in</button>
           </div>
         </div>
 
-        <button type="submit" class="btn-primary auth-submit-btn" [disabled]="isLoading()">
-          @if (isLoading()) {
-            Logging in...
-          } @else {
-            Log In
-          }
-        </button>
-      </form>
+        <!-- Right Overlay (Active when user is on Log In view) -->
+        <div class="overlay-panel overlay-right">
+          <div class="banner-card">
+            <img src="/logo.png" alt="Taskly Logo" class="banner-logo" />
+            <p class="banner-tagline">
+              Streamline collaborative pipelines, track milestones in real-time, and manage deadlines elegantly.
+            </p>
+          </div>
+          <div class="overlay-content">
+            <h2>New here?</h2>
+            <p>Create a workspace, save your projects, and keep every bright idea within reach.</p>
+            <button class="btn-ghost" (click)="toggleMode(true)">Create account</button>
+          </div>
+        </div>
 
-      <div class="auth-footer">
-        <p>Don't have an account? <a routerLink="/register" class="auth-link">Sign Up</a></p>
       </div>
     </div>
-  </div>
 
+  </div>
 </div>
