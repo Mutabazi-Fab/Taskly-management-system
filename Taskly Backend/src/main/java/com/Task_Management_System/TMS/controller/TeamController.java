@@ -26,6 +26,7 @@ public class TeamController {
 
     private final TeamService teamService;
     private final UserRepository userRepository;
+    private final com.Task_Management_System.TMS.repository.TeamMemberRepository teamMemberRepository;
 
     @PostMapping
     public ResponseEntity<TeamResponseDto> createTeam(@Valid @RequestBody TeamDto teamDto) {
@@ -58,7 +59,13 @@ public class TeamController {
         User currentUser = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new com.Task_Management_System.TMS.exception.ResourceNotFoundException("Current user not found"));
         TeamResponseDto team = teamService.getTeamById(id);
-        if (!team.getOwnerId().equals(currentUser.getId()) && !currentUser.isAdmin()) {
+
+        boolean isOwner = (team.getOwnerId() != null && team.getOwnerId().equals(currentUser.getId())) ||
+                teamMemberRepository.findByTeamIdAndUserId(id, currentUser.getId())
+                        .map(m -> m.getRole() == com.Task_Management_System.TMS.model.Role.OWNER)
+                        .orElse(false);
+
+        if (!isOwner && !currentUser.isAdmin()) {
             throw new BadRequestException("Only the team owner or an administrator can delete this team");
         }
         teamService.deleteTeam(id);

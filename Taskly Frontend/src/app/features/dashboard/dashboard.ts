@@ -216,7 +216,8 @@ export class DashboardComponent implements OnInit {
     const currentUserId = this.currentUser()?.id;
     const members = this.teamMembers();
     const userInTeam = members.find(m => m.userId === currentUserId);
-    return userInTeam?.role === 'OWNER';
+    const selected = this.selectedTeam();
+    return userInTeam?.role === 'OWNER' || (!!selected?.ownerId && selected.ownerId === currentUserId);
   });
 
   // Filter Signals

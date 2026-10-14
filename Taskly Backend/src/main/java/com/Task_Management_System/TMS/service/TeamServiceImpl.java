@@ -7,13 +7,8 @@ import com.Task_Management_System.TMS.dto.TeamResponseDto;
 import com.Task_Management_System.TMS.exception.BadRequestException;
 import com.Task_Management_System.TMS.exception.ConflictException;
 import com.Task_Management_System.TMS.exception.ResourceNotFoundException;
-import com.Task_Management_System.TMS.model.Role;
-import com.Task_Management_System.TMS.model.Team;
-import com.Task_Management_System.TMS.model.TeamMember;
-import com.Task_Management_System.TMS.model.User;
-import com.Task_Management_System.TMS.repository.TeamMemberRepository;
-import com.Task_Management_System.TMS.repository.TeamRepository;
-import com.Task_Management_System.TMS.repository.UserRepository;
+import com.Task_Management_System.TMS.model.*;
+import com.Task_Management_System.TMS.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +24,12 @@ public class TeamServiceImpl implements TeamService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final UserRepository userRepository;
+    private final BoardRepository boardRepository;
+    private final TaskListRepository taskListRepository;
+    private final TaskRepository taskRepository;
+    private final AttachmentRepository attachmentRepository;
+    private final JoinRequestRepository joinRequestRepository;
+    private final NotificationRepository notificationRepository;
 
     @Override
     @Transactional
@@ -111,8 +112,50 @@ public class TeamServiceImpl implements TeamService {
     public void deleteTeam(UUID id) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + id));
-        
-        // Hooks for deleting boards nested under this team will be added here in Phase 3
+
+        // 1. Delete notifications related to join requests for this team, then delete join requests
+        List<JoinRequest> joinRequests = joinRequestRepository.findByTeamId(id);
+        for (JoinRequest req : joinRequests) {
+            List<Notification> notifs = notificationRepository.findByRequestId(req.getId());
+            if (!notifs.isEmpty()) {
+                notificationRepository.deleteAll(notifs);
+            }
+        }
+        if (!joinRequests.isEmpty()) {
+            joinRequestRepository.deleteAll(joinRequests);
+        }
+
+        // 2. Cascade delete boards, lists, tasks, and attachments
+        List<Board> boards = boardRepository.findByTeamId(id);
+        for (Board board : boards) {
+            List<TaskList> lists = taskListRepository.findByBoardIdOrderByPositionAsc(board.getId());
+            for (TaskList list : lists) {
+                List<Task> tasks = taskRepository.findByTaskListId(list.getId());
+                for (Task task : tasks) {
+                    List<Attachment> attachments = attachmentRepository.findByTaskId(task.getId());
+                    if (!attachments.isEmpty()) {
+                        attachmentRepository.deleteAll(attachments);
+                    }
+                }
+                if (!tasks.isEmpty()) {
+                    taskRepository.deleteAll(tasks);
+                }
+            }
+            if (!lists.isEmpty()) {
+                taskListRepository.deleteAll(lists);
+            }
+        }
+        if (!boards.isEmpty()) {
+            boardRepository.deleteAll(boards);
+        }
+
+        // 3. Delete all team members
+        List<TeamMember> members = teamMemberRepository.findByTeamId(id);
+        if (!members.isEmpty()) {
+            teamMemberRepository.deleteAll(members);
+        }
+
+        // 4. Delete the team itself
         teamRepository.delete(team);
     }
 

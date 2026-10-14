@@ -4,7 +4,7 @@ Taskly is a robust, production-ready task management and productivity API built 
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 * **User Management & Auth:** Secured registration and login endpoints utilizing **Spring Security** and **BCrypt** password hashing with stateless **JWT tokens**.
 * **Team Collaboration:** Create teams, assign users as members or owners, and validate membership constraints.
@@ -17,7 +17,7 @@ Taskly is a robust, production-ready task management and productivity API built 
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 * **Language:** Java 21
 * **Backend Framework:** Spring Boot 3+ (Data JPA, Web, Security, Validation)
@@ -27,7 +27,7 @@ Taskly is a robust, production-ready task management and productivity API built 
 
 ---
 
-## ⚙️ Configuration & Database Setup
+## Configuration & Database Setup
 
 1. Make sure you have a local PostgreSQL instance running.
 2. Create a database named `task_mgt_db`.
@@ -48,7 +48,7 @@ spring.jpa.properties.hibernate.format_sql=true
 
 ---
 
-## 🏃 How to Run the Project
+## How to Run the Project
 
 Navigate to the project root and run the Spring Boot server using the Maven wrapper:
 
@@ -64,7 +64,7 @@ The application will launch on `http://localhost:8080`.
 
 ---
 
-## 📮 Postman E2E Testing Flow
+## Postman E2E Testing Flow
 
 All endpoints (except registration and login) require a Bearer token in the `Authorization` header: `Authorization: Bearer <your_jwt_token>`.
 
