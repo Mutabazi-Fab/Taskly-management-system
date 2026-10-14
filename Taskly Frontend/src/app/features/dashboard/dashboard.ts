@@ -63,6 +63,22 @@ export class DashboardComponent implements OnInit {
   denialReasonInput = signal<string>('');
   selectedRequestToDeny = signal<string | null>(null);
 
+  // Search & Filter state
+  searchQuery = signal<string>('');
+
+  // Drag and Drop state
+  draggedTask = signal<Task | null>(null);
+  dragOverListId = signal<string | null>(null);
+
+  // Task Details Modal state
+  selectedTaskForDetails = signal<Task | null>(null);
+  editTaskTitle = signal<string>('');
+  editTaskDesc = signal<string>('');
+  editTaskPriority = signal<TaskPriority>('MEDIUM');
+  editTaskDueDate = signal<string>('');
+  editTaskAssigneeId = signal<string>('');
+  editTaskStatus = signal<TaskStatus>('TODO');
+
   // Toast System
   toasts = signal<{ id: string; message: string; type: 'success' | 'danger' | 'info' }[]>([]);
 
@@ -363,14 +379,29 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  // --- Filters ---
+  // --- Filters & Helpers ---
   getFilteredTasks(listId: string): Task[] {
     const listTasks = this.tasksMap()[listId] || [];
+    const query = this.searchQuery().trim().toLowerCase();
     return listTasks.filter(task => {
       const matchPriority = this.selectedPriorityFilter() === 'ALL' || task.priority === this.selectedPriorityFilter();
       const matchAssignee = this.selectedAssigneeFilter() === 'ALL' || task.assigneeId === this.selectedAssigneeFilter();
-      return matchPriority && matchAssignee;
+      const matchSearch = !query ||
+        task.title.toLowerCase().includes(query) ||
+        (task.description && task.description.toLowerCase().includes(query));
+      return matchPriority && matchAssignee && matchSearch;
     });
+  }
+
+  getAssigneeName(assigneeId: string | null | undefined): string {
+    if (!assigneeId) return '';
+    const user = this.allUsers().find(u => u.id === assigneeId);
+    return user ? user.username : '';
+  }
+
+  getAssigneeInitials(assigneeId: string | null | undefined): string {
+    const name = this.getAssigneeName(assigneeId);
+    return name ? name.substring(0, 2).toUpperCase() : '';
   }
 
   // --- CRUD Modals Handlers ---
@@ -468,7 +499,149 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  // --- Task Operations ---
+  // --- Task Operations & Drag and Drop ---
+
+  onTaskDragStart(task: Task, event: DragEvent): void {
+    this.draggedTask.set(task);
+    if (event.dataTransfer) {
+      event.dataTransfer.setData('text/plain', task.id);
+      event.dataTransfer.effectAllowed = 'move';
+    }
+  }
+
+  onTaskDragEnd(): void {
+    this.draggedTask.set(null);
+    this.dragOverListId.set(null);
+  }
+
+  onListDragOver(listId: string, event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    this.dragOverListId.set(listId);
+  }
+
+  onListDragLeave(listId: string): void {
+    if (this.dragOverListId() === listId) {
+      this.dragOverListId.set(null);
+    }
+  }
+
+  onListDrop(targetListId: string, event: DragEvent): void {
+    event.preventDefault();
+    this.dragOverListId.set(null);
+    const task = this.draggedTask();
+    if (!task || task.listId === targetListId) {
+      this.draggedTask.set(null);
+      return;
+    }
+
+    const lists = this.lists();
+    const targetList = lists.find(l => l.id === targetListId);
+    let nextStatus: TaskStatus = 'TODO';
+    if (targetList) {
+      const nameLower = targetList.name.toLowerCase();
+      if (nameLower.includes('done') || nameLower.includes('complete')) {
+        nextStatus = 'DONE';
+      } else if (nameLower.includes('progress') || nameLower.includes('doing')) {
+        nextStatus = 'IN_PROGRESS';
+      }
+    }
+
+    // Optimistically update local view for instant snappy feedback
+    const currentMap = { ...this.tasksMap() };
+    const oldListTasks = (currentMap[task.listId] || []).filter(t => t.id !== task.id);
+    const updatedTask: Task = { ...task, listId: targetListId, status: nextStatus };
+    const newListTasks = [...(currentMap[targetListId] || []), updatedTask];
+    currentMap[task.listId] = oldListTasks;
+    currentMap[targetListId] = newListTasks;
+    this.tasksMap.set(currentMap);
+
+    this.taskService.updateTask(task.id, { listId: targetListId }).subscribe({
+      next: () => {
+        this.taskService.updateTaskStatus(task.id, nextStatus).subscribe({
+          next: () => {
+            const board = this.selectedBoard();
+            if (board) this.loadBoardData(board.id);
+            this.loadAllTasks();
+            this.showToast(`Task moved to ${targetList?.name || 'new column'}.`, 'success');
+          },
+          error: () => {
+            const board = this.selectedBoard();
+            if (board) this.loadBoardData(board.id);
+            this.showToast('Failed to update task status.', 'danger');
+          }
+        });
+      },
+      error: () => {
+        const board = this.selectedBoard();
+        if (board) this.loadBoardData(board.id);
+        this.showToast('Failed to move task.', 'danger');
+      }
+    });
+
+    this.draggedTask.set(null);
+  }
+
+  // --- Task Details Drawer / Modal ---
+
+  openTaskDetails(task: Task, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.selectedTaskForDetails.set(task);
+    this.editTaskTitle.set(task.title);
+    this.editTaskDesc.set(task.description || '');
+    this.editTaskPriority.set(task.priority);
+    this.editTaskDueDate.set(task.dueDate ? task.dueDate.substring(0, 10) : '');
+    this.editTaskAssigneeId.set(task.assigneeId || '');
+    this.editTaskStatus.set(task.status);
+  }
+
+  closeTaskDetails(): void {
+    this.selectedTaskForDetails.set(null);
+  }
+
+  saveTaskDetails(): void {
+    const task = this.selectedTaskForDetails();
+    if (!task) return;
+
+    if (!this.editTaskTitle().trim()) {
+      this.showToast('Task title cannot be empty.', 'danger');
+      return;
+    }
+
+    const payload: Partial<Task> = {
+      title: this.editTaskTitle().trim(),
+      description: this.editTaskDesc().trim(),
+      priority: this.editTaskPriority(),
+      dueDate: this.editTaskDueDate() || undefined,
+      assigneeId: this.editTaskAssigneeId() || null
+    };
+
+    this.taskService.updateTask(task.id, payload).subscribe({
+      next: () => {
+        if (this.editTaskStatus() !== task.status) {
+          this.taskService.updateTaskStatus(task.id, this.editTaskStatus()).subscribe({
+            next: () => {
+              this.showToast('Task updated successfully.', 'success');
+              const board = this.selectedBoard();
+              if (board) this.loadBoardData(board.id);
+              this.loadAllTasks();
+              this.closeTaskDetails();
+            },
+            error: () => this.showToast('Failed to update task status.', 'danger')
+          });
+        } else {
+          this.showToast('Task updated successfully.', 'success');
+          const board = this.selectedBoard();
+          if (board) this.loadBoardData(board.id);
+          this.loadAllTasks();
+          this.closeTaskDetails();
+        }
+      },
+      error: (err) => this.showToast(err.error?.message || 'Failed to update task.', 'danger')
+    });
+  }
 
   moveTask(task: Task, direction: 'left' | 'right'): void {
     const lists = this.lists();

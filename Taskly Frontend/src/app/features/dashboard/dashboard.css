@@ -1462,5 +1462,145 @@
   border-radius: 8px;
 }
 
+/* ==========================================
+   LIVE TOP-BAR SEARCH BOX
+   ========================================== */
+.top-bar-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F8FAFC;
+  border: 1px solid rgba(52, 71, 170, 0.15);
+  border-radius: 8px;
+  padding: 6px 12px;
+  transition: var(--transition-smooth);
+}
+
+.top-bar-search-box:focus-within {
+  background: #FFFFFF;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(52, 71, 170, 0.12);
+}
+
+.top-bar-search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.86rem;
+  color: var(--color-text-main);
+  width: 175px;
+}
+
+.top-bar-search-box input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.btn-clear-search {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.btn-clear-search:hover {
+  color: var(--color-danger);
+}
+
+/* ==========================================
+   KANBAN DRAG AND DROP & CARD POLISH
+   ========================================== */
+.kanban-column.drag-over {
+  border-color: var(--color-primary);
+  background: rgba(52, 71, 170, 0.04);
+  box-shadow: 0 0 0 2px rgba(52, 71, 170, 0.22);
+}
+
+.task-card {
+  cursor: grab;
+  user-select: none;
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
+
+.task-card.is-dragging {
+  opacity: 0.45;
+  transform: scale(0.97);
+  border: 2px dashed var(--color-primary);
+  box-shadow: 0 8px 20px rgba(52, 71, 170, 0.15);
+}
+
+.task-assignee-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #FFFFFF;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ==========================================
+   TASK DETAILS MODAL & STATUS BADGES
+   ========================================== */
+.task-details-modal-card {
+  max-width: 550px !important;
+  width: 90% !important;
+  padding: 26px !important;
+  text-align: left !important;
+}
+
+.task-details-modal-card textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(52, 71, 170, 0.15);
+  font-family: inherit;
+  font-size: 0.88rem;
+  resize: vertical;
+  background: #F8FAFC;
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.task-details-modal-card textarea:focus {
+  background: #FFFFFF;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(52, 71, 170, 0.1);
+}
+
+.status-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.status-badge.todo {
+  background: #F1F5F9;
+  color: var(--color-text-muted);
+}
+
+.status-badge.in_progress {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--color-warning);
+}
+
+.status-badge.done {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-success);
+}
+
 
 

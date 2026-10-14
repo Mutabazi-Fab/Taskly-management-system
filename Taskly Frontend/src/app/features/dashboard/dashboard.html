@@ -199,13 +199,22 @@
           <p class="subtitle">Here's what's happening today.</p>
         </div>
         <div class="top-bar-right">
-          <!-- Search Button -->
-          <button class="top-bar-btn" title="Search Tasks">
+          <!-- Interactive Search Input -->
+          <div class="top-bar-search-box">
             <svg class="top-bar-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-          </button>
+            <input 
+              type="text" 
+              placeholder="Search tasks..." 
+              [ngModel]="searchQuery()" 
+              (ngModelChange)="searchQuery.set($event)"
+            />
+            @if (searchQuery()) {
+              <button class="btn-clear-search" (click)="searchQuery.set('')" title="Clear Search">×</button>
+            }
+          </div>
           
           <!-- Notification Button with Badge Dropdown -->
           <div class="notifications-container" style="position: relative;">
@@ -671,9 +680,15 @@
         <!-- Column Grid columns -->
         <section class="kanban-board">
           @for (list of lists(); track list.id) {
-            <div class="kanban-column glass-card">
+            <div 
+              class="kanban-column glass-card"
+              [class.drag-over]="dragOverListId() === list.id"
+              (dragover)="onListDragOver(list.id, $event)"
+              (dragleave)="onListDragLeave(list.id)"
+              (drop)="onListDrop(list.id, $event)"
+            >
               <div class="column-header">
-                <h3>{{ list.name }}</h3>
+                <h3>{{ list.name }} ({{ getFilteredTasks(list.id).length }})</h3>
                 <div class="column-actions">
                   <button class="btn-action-icon" (click)="openCreateTaskModal(list.id)" title="Add Task">+</button>
                   <button class="btn-action-icon danger" (click)="deleteList(list.id)" title="Delete Column">×</button>
@@ -683,32 +698,57 @@
               <!-- Tasks Container -->
               <div class="tasks-list">
                 @for (task of getFilteredTasks(list.id); track task.id) {
-                  <div class="task-card">
+                  <div 
+                    class="task-card"
+                    [class.is-dragging]="draggedTask()?.id === task.id"
+                    draggable="true"
+                    (dragstart)="onTaskDragStart(task, $event)"
+                    (dragend)="onTaskDragEnd()"
+                    (click)="openTaskDetails(task, $event)"
+                    title="Click to view details or drag to move column"
+                  >
                     <div class="task-card-header">
                       <span class="priority-badge" [class]="task.priority.toLowerCase()">
                         {{ task.priority }}
                       </span>
-                      <button class="btn-card-delete" (click)="deleteTask(task)">×</button>
+                      <button class="btn-card-delete" (click)="deleteTask(task); $event.stopPropagation()" title="Delete Task">×</button>
                     </div>
                     <h4>{{ task.title }}</h4>
-                    <p class="task-desc">{{ task.description }}</p>
+                    @if (task.description) {
+                      <p class="task-desc">{{ task.description }}</p>
+                    }
                     
                     <div class="task-card-footer">
                       <div class="due-date">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        {{ task.dueDate | date:'MMM d' }}
+                        @if (task.dueDate) {
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          {{ task.dueDate | date:'MMM d' }}
+                        }
                       </div>
 
-                      <div class="move-controls">
-                        <button (click)="moveTask(task, 'left')" title="Move Left">&lt;</button>
-                        <button (click)="moveTask(task, 'right')" title="Move Right">&gt;</button>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        @if (task.assigneeId) {
+                          <span class="task-assignee-avatar" [title]="'Assigned to ' + getAssigneeName(task.assigneeId)">
+                            {{ getAssigneeInitials(task.assigneeId) }}
+                          </span>
+                        }
+                        <div class="move-controls" (click)="$event.stopPropagation()">
+                          <button (click)="moveTask(task, 'left')" title="Move Left">&lt;</button>
+                          <button (click)="moveTask(task, 'right')" title="Move Right">&gt;</button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 } @empty {
-                  <p class="empty-column-text">No tasks here.</p>
+                  <p class="empty-column-text">
+                    @if (searchQuery()) {
+                      No matching tasks.
+                    } @else {
+                      Drop tasks here or click + to add.
+                    }
+                  </p>
                 }
               </div>
             </div>
@@ -982,6 +1022,76 @@
         <div class="modal-actions">
           <button class="btn-secondary" (click)="showCreateTask.set(false)">Cancel</button>
           <button class="btn-primary" (click)="onCreateTaskSubmit()">Create Task</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Task Details Modal -->
+  @if (selectedTaskForDetails()) {
+    <div class="modal-overlay" (click)="closeTaskDetails()">
+      <div class="modal-card glass-card task-details-modal-card" (click)="$event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(52, 71, 170, 0.08); padding-bottom: 12px; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="priority-badge" [class]="editTaskPriority().toLowerCase()">{{ editTaskPriority() }}</span>
+            <span class="status-badge" [class]="editTaskStatus().toLowerCase()">{{ editTaskStatus() }}</span>
+          </div>
+          <button class="btn-text-close" (click)="closeTaskDetails()" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--color-text-muted);">×</button>
+        </div>
+
+        <div class="form-group">
+          <label>Task Title</label>
+          <input type="text" [(ngModel)]="editTaskTitle" placeholder="Task name" />
+        </div>
+
+        <div class="form-group">
+          <label>Description & Notes</label>
+          <textarea [(ngModel)]="editTaskDesc" rows="4" placeholder="Detailed notes, steps, or updates..."></textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label>Priority</label>
+            <select [(ngModel)]="editTaskPriority">
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Status</label>
+            <select [(ngModel)]="editTaskStatus">
+              <option value="TODO">To Do</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="DONE">Done</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label>Due Date</label>
+            <input type="date" [(ngModel)]="editTaskDueDate" />
+          </div>
+
+          <div class="form-group">
+            <label>Assignee</label>
+            <select [(ngModel)]="editTaskAssigneeId">
+              <option value="">Unassigned</option>
+              @for (user of allUsers(); track user.id) {
+                <option [value]="user.id">{{ user.username }} ({{ user.email }})</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+          <button class="btn-danger-sm" (click)="deleteTask(selectedTaskForDetails()!); closeTaskDetails()">Delete Task</button>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-secondary" (click)="closeTaskDetails()">Cancel</button>
+            <button class="btn-primary" (click)="saveTaskDetails()">Save Changes</button>
+          </div>
         </div>
       </div>
     </div>
