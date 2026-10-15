@@ -93,21 +93,21 @@ export class DashboardComponent implements OnInit {
   // Custom Confirmation Modal System
   showConfirmModal = signal(false);
   confirmMessage = signal('');
-  confirmAction = signal<(() => void) | null>(null);
+  private pendingConfirmAction: (() => void) | null = null;
 
   triggerConfirm(message: string, action: () => void): void {
     this.confirmMessage.set(message);
-    this.confirmAction.set(() => action);
+    this.pendingConfirmAction = action;
     this.showConfirmModal.set(true);
   }
 
   onConfirmSubmit(): void {
-    const action = this.confirmAction();
+    const action = this.pendingConfirmAction;
+    this.pendingConfirmAction = null;
+    this.showConfirmModal.set(false);
     if (action) {
       action();
     }
-    this.showConfirmModal.set(false);
-    this.confirmAction.set(null);
   }
 
   @HostListener('document:click', ['$event'])

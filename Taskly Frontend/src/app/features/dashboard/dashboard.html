@@ -688,7 +688,7 @@
               (drop)="onListDrop(list.id, $event)"
             >
               <div class="column-header">
-                <h3>{{ list.name }} ({{ getFilteredTasks(list.id).length }})</h3>
+                <h3>{{ list.name }} <span class="column-count-badge">{{ getFilteredTasks(list.id).length }}</span></h3>
                 <div class="column-actions">
                   <button class="btn-action-icon" (click)="openCreateTaskModal(list.id)" title="Add Task">+</button>
                   <button class="btn-action-icon danger" (click)="deleteList(list.id)" title="Delete Column">×</button>
@@ -700,6 +700,7 @@
                 @for (task of getFilteredTasks(list.id); track task.id) {
                   <div 
                     class="task-card"
+                    [class]="'priority-border-' + task.priority.toLowerCase()"
                     [class.is-dragging]="draggedTask()?.id === task.id"
                     draggable="true"
                     (dragstart)="onTaskDragStart(task, $event)"
@@ -742,13 +743,15 @@
                     </div>
                   </div>
                 } @empty {
-                  <p class="empty-column-text">
-                    @if (searchQuery()) {
-                      No matching tasks.
-                    } @else {
-                      Drop tasks here or click + to add.
-                    }
-                  </p>
+                  <div class="empty-column-box">
+                    <p class="empty-column-text">
+                      @if (searchQuery()) {
+                        No matching tasks.
+                      } @else {
+                        Drop tasks here or click + to add.
+                      }
+                    </p>
+                  </div>
                 }
               </div>
             </div>
