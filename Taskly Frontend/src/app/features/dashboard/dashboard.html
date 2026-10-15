@@ -565,14 +565,31 @@
 
         <section class="dashboard-widgets-layout" style="grid-template-columns: 1fr; margin-top: 10px;">
           <div class="widget-card glass-card">
-            <div class="widget-card-header">
+            <div class="widget-card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
               <h3>Deadlines Schedule</h3>
+              <div class="calendar-filter-tabs">
+                <button class="filter-chip" [class.active]="calendarFilter() === 'ALL'" (click)="calendarFilter.set('ALL')">
+                  All ({{ getTasksWithDueDate().length }})
+                </button>
+                <button class="filter-chip" [class.active]="calendarFilter() === 'UPCOMING'" (click)="calendarFilter.set('UPCOMING')">
+                  Upcoming
+                </button>
+                <button class="filter-chip chip-warning" [class.active]="calendarFilter() === 'OVERDUE'" (click)="calendarFilter.set('OVERDUE')">
+                  Overdue ({{ overdueTasksCount() }})
+                </button>
+                <button class="filter-chip chip-success" [class.active]="calendarFilter() === 'DONE'" (click)="calendarFilter.set('DONE')">
+                  Completed
+                </button>
+              </div>
             </div>
             <div class="events-list" style="gap: 16px;">
-              @for (task of getTasksWithDueDate(); track task.id) {
-                <div class="event-item" style="padding: 20px; align-items: flex-start; gap: 16px;">
-                  <span class="event-icon" [class.warning]="task.priority === 'HIGH'" style="width: 48px; height: 48px; display: flex; justify-content: center; align-items: center;">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              @for (task of filteredCalendarTasks(); track task.id) {
+                <div class="event-item calendar-task-item" 
+                     [class.overdue-item]="isTaskOverdue(task)"
+                     (click)="openTaskDetails(task)"
+                     style="padding: 18px 20px; align-items: flex-start; gap: 16px; cursor: pointer;">
+                  <span class="event-icon" [class.warning]="task.priority === 'HIGH' || isTaskOverdue(task)" style="width: 44px; height: 44px; display: flex; justify-content: center; align-items: center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                       <line x1="16" y1="2" x2="16" y2="6"></line>
                       <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -580,15 +597,23 @@
                     </svg>
                   </span>
                   <div class="event-details" style="flex: 1;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                      <strong style="font-size: 1.1rem; color: var(--color-text-main);">{{ task.title }}</strong>
-                      <span class="priority-badge" [class]="task.priority.toLowerCase()">{{ task.priority }}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 8px;">
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <strong style="font-size: 1.05rem; color: var(--color-text-main);">{{ task.title }}</strong>
+                        @if (isTaskOverdue(task)) {
+                          <span class="badge-overdue-pill">Overdue</span>
+                        }
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="status-badge" [class]="task.status.toLowerCase()">{{ task.status.replace('_', ' ') }}</span>
+                        <span class="priority-badge" [class]="task.priority.toLowerCase()">{{ task.priority }}</span>
+                      </div>
                     </div>
-                    <p style="font-size: 0.9rem; margin-top: 4px; color: var(--color-text-muted);">
-                      Due Date: <strong>{{ task.dueDate | date:'MMMM d, y' }}</strong> &nbsp;|&nbsp; Status: <strong>{{ task.status }}</strong>
+                    <p style="font-size: 0.88rem; margin-top: 6px; color: var(--color-text-muted);">
+                      Due Date: <strong [style.color]="isTaskOverdue(task) ? '#EF4444' : 'inherit'">{{ task.dueDate | date:'MMMM d, y' }}</strong>
                     </p>
                     @if (task.description) {
-                      <p style="font-size: 0.88rem; color: var(--color-text-muted); margin-top: 8px; border-left: 3px solid rgba(52, 71, 170, 0.15); padding-left: 10px; font-style: italic;">
+                      <p style="font-size: 0.86rem; color: var(--color-text-muted); margin-top: 8px; border-left: 3px solid rgba(52, 71, 170, 0.15); padding-left: 10px;">
                         {{ task.description }}
                       </p>
                     }
@@ -596,8 +621,8 @@
                 </div>
               } @empty {
                 <div style="padding: 40px; text-align: center; color: var(--color-text-muted);">
-                  <p style="font-size: 1.1rem; font-weight: 600;">No scheduled tasks found.</p>
-                  <p style="font-size: 0.9rem; margin-top: 4px;">Seeded tasks or tasks created with due dates will appear here chronologically!</p>
+                  <p style="font-size: 1.05rem; font-weight: 600;">No scheduled tasks found.</p>
+                  <p style="font-size: 0.88rem; margin-top: 4px;">Tasks with due dates matching this filter will appear here.</p>
                 </div>
               }
             </div>
@@ -834,38 +859,163 @@
            VIEW 4: REPORTS VIEW
            ========================================== -->
       @if (activeTab() === 'REPORTS') {
-        <section class="reports-panel glass-card" style="margin-top: 20px; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 30px;">
-          <h3>Overall Productivity Analytics</h3>
-          <div class="donut-chart-container" style="width: 260px; height: 260px;">
-            <svg class="donut-chart-large" viewBox="0 0 36 36">
-              <circle class="donut-ring" cx="18" cy="18" r="15.915" fill="transparent" stroke="#F1F5F9" stroke-width="4"></circle>
-              
-              <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
-                stroke="#F59E0B" stroke-width="4" 
-                [attr.stroke-dasharray]="getStrokeDashArray(myTasksCount() - inProgressTasksCount() - completedTasksCount())" 
-                stroke-dashoffset="25"></circle>
+        <header class="workspace-header" style="margin-top: 15px;">
+          <div class="board-selector-section">
+            <h2>Productivity & Team Analytics</h2>
+            <p class="subtitle">Real-time performance, workload distribution, and milestone tracking</p>
+          </div>
+        </header>
 
-              <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
-                stroke="#3447AA" stroke-width="4" 
-                [attr.stroke-dasharray]="getStrokeDashArray(inProgressTasksCount())" 
-                [attr.stroke-dashoffset]="25 + getStrokeDashOffset(myTasksCount() - inProgressTasksCount() - completedTasksCount())"></circle>
-
-              <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
-                stroke="#EC4899" stroke-width="4" 
-                [attr.stroke-dasharray]="getStrokeDashArray(completedTasksCount())" 
-                [attr.stroke-dashoffset]="25 + getStrokeDashOffset(myTasksCount() - inProgressTasksCount() - completedTasksCount(), inProgressTasksCount())"></circle>
-            </svg>
-            <div class="donut-center-label">
-              <span class="donut-number" style="font-size: 2.2rem;">{{ myTasksCount() }}</span>
-              <span class="donut-label">Total Tasks</span>
+        <!-- KPI Mini Stats Grid -->
+        <div class="analytics-kpi-grid">
+          <div class="kpi-card glass-card">
+            <div class="kpi-icon-box kpi-blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <div class="kpi-info">
+              <span class="kpi-label">Completion Rate</span>
+              <div class="kpi-value-row">
+                <span class="kpi-number">{{ completionRate() }}%</span>
+                <span class="kpi-subtext">of your tasks</span>
+              </div>
+              <div class="kpi-progress-bar">
+                <div class="kpi-progress-fill" [style.width.%]="completionRate()"></div>
+              </div>
             </div>
           </div>
-          <div class="donut-legend-horizontal" style="max-width: 500px;">
-            <div class="legend-item"><span class="bullet todo"></span> Pending Tasks ({{ myTasksCount() - inProgressTasksCount() - completedTasksCount() }})</div>
-            <div class="legend-item"><span class="bullet in-prog"></span> Active Tasks ({{ inProgressTasksCount() }})</div>
-            <div class="legend-item"><span class="bullet done"></span> Completed Tasks ({{ completedTasksCount() }})</div>
+
+          <div class="kpi-card glass-card">
+            <div class="kpi-icon-box kpi-purple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+            </div>
+            <div class="kpi-info">
+              <span class="kpi-label">Total Assigned</span>
+              <div class="kpi-value-row">
+                <span class="kpi-number">{{ myTasksCount() }}</span>
+                <span class="kpi-subtext">tasks in queue</span>
+              </div>
+              <div class="kpi-tags-row">
+                <span class="kpi-mini-pill">{{ completedTasksCount() }} done</span>
+                <span class="kpi-mini-pill active-pill">{{ inProgressTasksCount() }} active</span>
+              </div>
+            </div>
           </div>
-        </section>
+
+          <div class="kpi-card glass-card">
+            <div class="kpi-icon-box kpi-amber">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div class="kpi-info">
+              <span class="kpi-label">Active Work</span>
+              <div class="kpi-value-row">
+                <span class="kpi-number">{{ inProgressTasksCount() }}</span>
+                <span class="kpi-subtext">in progress</span>
+              </div>
+              <span class="kpi-note" style="color: var(--color-warning);">Currently being executed</span>
+            </div>
+          </div>
+
+          <div class="kpi-card glass-card">
+            <div class="kpi-icon-box" [class.kpi-red]="overdueTasksCount() > 0" [class.kpi-green]="overdueTasksCount() === 0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <div class="kpi-info">
+              <span class="kpi-label">Overdue Alert</span>
+              <div class="kpi-value-row">
+                <span class="kpi-number" [style.color]="overdueTasksCount() > 0 ? '#EF4444' : '#10B981'">{{ overdueTasksCount() }}</span>
+                <span class="kpi-subtext">{{ overdueTasksCount() > 0 ? 'needs attention' : 'on schedule' }}</span>
+              </div>
+              <span class="kpi-note" [style.color]="overdueTasksCount() > 0 ? '#EF4444' : '#10B981'">
+                {{ overdueTasksCount() > 0 ? 'Past scheduled deadline' : 'Zero overdue milestones' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Body: Donut Distribution & Team Workload -->
+        <div class="analytics-details-layout">
+          <div class="widget-card glass-card">
+            <div class="widget-card-header">
+              <h3>Task Status Distribution</h3>
+            </div>
+            <div style="padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+              <div class="donut-chart-container" style="width: 220px; height: 220px;">
+                <svg class="donut-chart-large" viewBox="0 0 36 36">
+                  <circle class="donut-ring" cx="18" cy="18" r="15.915" fill="transparent" stroke="#F1F5F9" stroke-width="4"></circle>
+                  
+                  <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
+                    stroke="#F59E0B" stroke-width="4" 
+                    [attr.stroke-dasharray]="getStrokeDashArray(myTasksCount() - inProgressTasksCount() - completedTasksCount())" 
+                    stroke-dashoffset="25"></circle>
+
+                  <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
+                    stroke="#3447AA" stroke-width="4" 
+                    [attr.stroke-dasharray]="getStrokeDashArray(inProgressTasksCount())" 
+                    [attr.stroke-dashoffset]="25 + getStrokeDashOffset(myTasksCount() - inProgressTasksCount() - completedTasksCount())"></circle>
+
+                  <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" 
+                    stroke="#EC4899" stroke-width="4" 
+                    [attr.stroke-dasharray]="getStrokeDashArray(completedTasksCount())" 
+                    [attr.stroke-dashoffset]="25 + getStrokeDashOffset(myTasksCount() - inProgressTasksCount() - completedTasksCount(), inProgressTasksCount())"></circle>
+                </svg>
+                <div class="donut-center-label">
+                  <span class="donut-number" style="font-size: 2rem;">{{ myTasksCount() }}</span>
+                  <span class="donut-label">Total Tasks</span>
+                </div>
+              </div>
+              <div class="donut-legend-horizontal" style="width: 100%; justify-content: center; gap: 16px;">
+                <div class="legend-item"><span class="bullet todo"></span> Pending ({{ myTasksCount() - inProgressTasksCount() - completedTasksCount() }})</div>
+                <div class="legend-item"><span class="bullet in-prog"></span> Active ({{ inProgressTasksCount() }})</div>
+                <div class="legend-item"><span class="bullet done"></span> Completed ({{ completedTasksCount() }})</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="widget-card glass-card">
+            <div class="widget-card-header">
+              <h3>Team Workload & Progress</h3>
+            </div>
+            <div class="team-workload-list" style="padding: 20px; display: flex; flex-direction: column; gap: 18px;">
+              @for (member of teamWorkloads(); track member.username) {
+                <div class="workload-item">
+                  <div class="workload-info">
+                    <div class="workload-user">
+                      <span class="avatar-circle-sm">{{ member.username.substring(0, 2).toUpperCase() }}</span>
+                      <strong class="workload-username">{{ member.username }}</strong>
+                    </div>
+                    <div class="workload-meta">
+                      <span class="workload-badge">{{ member.activeCount }} active tasks</span>
+                      <span class="workload-pct">{{ member.progress }}%</span>
+                    </div>
+                  </div>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar-fill" [style.width.%]="member.progress"></div>
+                  </div>
+                </div>
+              } @empty {
+                <div style="padding: 30px; text-align: center; color: var(--color-text-muted);">
+                  <p style="font-weight: 500;">No team members found in the current workspace.</p>
+                  <p style="font-size: 0.85rem; margin-top: 4px;">Select or join a team to see workload distribution.</p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
       }
 
       <!-- ==========================================

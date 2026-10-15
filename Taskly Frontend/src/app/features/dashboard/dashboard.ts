@@ -142,6 +142,34 @@ export class DashboardComponent implements OnInit {
       .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime());
   });
 
+  // Calendar filter state
+  calendarFilter = signal<'ALL' | 'UPCOMING' | 'OVERDUE' | 'DONE'>('ALL');
+
+  filteredCalendarTasks = computed(() => {
+    const tasks = this.getTasksWithDueDate();
+    const filter = this.calendarFilter();
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    if (filter === 'OVERDUE') {
+      return tasks.filter(t => t.status !== 'DONE' && t.dueDate && new Date(t.dueDate) < now);
+    }
+    if (filter === 'UPCOMING') {
+      return tasks.filter(t => t.status !== 'DONE' && t.dueDate && new Date(t.dueDate) >= now);
+    }
+    if (filter === 'DONE') {
+      return tasks.filter(t => t.status === 'DONE');
+    }
+    return tasks;
+  });
+
+  isTaskOverdue(task: Task): boolean {
+    if (!task.dueDate || task.status === 'DONE') return false;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return new Date(task.dueDate) < now;
+  }
+
   // Calculate dynamic team activities from actual database tasks
   teamActivities = computed(() => {
     const users = this.allUsers();
@@ -222,6 +250,11 @@ export class DashboardComponent implements OnInit {
   myTasksCount = computed(() => this.myTasks().length);
   inProgressTasksCount = computed(() => this.myTasks().filter(t => t.status === 'IN_PROGRESS').length);
   completedTasksCount = computed(() => this.myTasks().filter(t => t.status === 'DONE').length);
+  completionRate = computed(() => {
+    const total = this.myTasksCount();
+    if (total === 0) return 0;
+    return Math.round((this.completedTasksCount() / total) * 100);
+  });
   overdueTasksCount = computed(() => {
     const now = new Date();
     now.setHours(0,0,0,0);
