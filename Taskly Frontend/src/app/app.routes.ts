@@ -9,8 +9,8 @@ export const routes: Routes = [
     },
     {
         path: 'register',
-        redirectTo: 'login',
-        pathMatch: 'full'
+        loadComponent: () => import('./features/login/login').then(m => m.LoginComponent),
+        data: { mode: 'signup' }
     },
     {
         path: 'dashboard',

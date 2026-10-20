@@ -18,7 +18,7 @@
   overflow: hidden;
   width: 1040px; /* Enlarged modern width */
   max-width: 100%;
-  min-height: 640px; /* Enlarged modern height */
+  min-height: 660px; /* Accommodate confirm password & strength gauge */
   margin: auto;
 }
 
@@ -220,7 +220,7 @@ form {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: 40px 60px;
+  padding: 30px 50px;
   height: 100%;
   box-sizing: border-box;
 }
@@ -366,6 +366,102 @@ form {
   margin-bottom: 16px;
   text-align: center;
   box-sizing: border-box;
+}
+
+/* Password Strength & Real-time Indicator */
+.password-strength-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -2px;
+  margin-bottom: 14px;
+}
+
+.strength-meter {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.strength-bar {
+  height: 4px;
+  flex: 1;
+  border-radius: 2px;
+  background-color: #E2E8F0;
+  transition: all 0.3s ease;
+}
+
+.strength-bar.active.level-1 {
+  background-color: #EF4444; /* Weak */
+}
+
+.strength-bar.active.level-2 {
+  background-color: #F59E0B; /* Good */
+}
+
+.strength-bar.active.level-3 {
+  background-color: #10B981; /* Strong */
+}
+
+.strength-text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.text-level-0 {
+  color: #94A3B8;
+}
+
+.text-level-1 {
+  color: #EF4444;
+}
+
+.text-level-2 {
+  color: #F59E0B;
+}
+
+.text-level-3 {
+  color: #10B981;
+}
+
+.password-mismatch-note {
+  display: block;
+  font-size: 0.75rem;
+  color: #EF4444;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* Remember Me Checkbox */
+.form-row-remember {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: -6px;
+  margin-bottom: 14px;
+}
+
+.remember-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #64748B;
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember-checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: #3B82F6;
+  border-radius: 4px;
 }
 
 /* Mobile responsive fallback */
