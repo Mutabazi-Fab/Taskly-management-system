@@ -25,7 +25,7 @@ Built as a decoupled architecture that packages into a unified Spring Boot monor
    * Admins can approve or deny requests directly from the dropdown. Rejections prompt a reason textbox.
    * Notifications self-heal and disappear immediately once processed.
 6. **Polished In-App UI Popups:** Uses fully responsive floating toast notifications and center-aligned modal confirmation boxes, completely avoiding default grey browser dialogs.
-7. **Workspace Analytics:** Computed workload statistics card showing active tasks and progress bars per team member.
+
 
 ---
 
