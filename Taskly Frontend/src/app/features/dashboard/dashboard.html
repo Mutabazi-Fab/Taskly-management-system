@@ -232,14 +232,49 @@
             @if (showNotificationsDropdown()) {
               <div class="notifications-dropdown glass-card">
                 <div class="dropdown-header">
-                  <h4>Notifications ({{ unreadNotificationsCount() }})</h4>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <h4>Notifications</h4>
+                    @if (unreadNotificationsCount() > 0) {
+                      <span class="notif-count-pill">{{ unreadNotificationsCount() }}</span>
+                    }
+                  </div>
                   <button class="btn-text-close" (click)="showNotificationsDropdown.set(false)" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--color-text-muted);">×</button>
                 </div>
+
+                <!-- Subheader Tabs & Actions -->
+                <div class="notif-toolbar">
+                  <div class="notif-tabs">
+                    <button class="notif-tab-btn" [class.active]="notificationFilter() === 'UNREAD'" (click)="notificationFilter.set('UNREAD')">
+                      Unread ({{ unreadNotificationsCount() }})
+                    </button>
+                    <button class="notif-tab-btn" [class.active]="notificationFilter() === 'ALL'" (click)="notificationFilter.set('ALL')">
+                      All ({{ notifications().length }})
+                    </button>
+                  </div>
+                  <div class="notif-quick-actions">
+                    @if (unreadNotificationsCount() > 0) {
+                      <button class="btn-notif-action" (click)="markAllNotificationsRead()" title="Mark all notifications as read">
+                        Mark all read
+                      </button>
+                    }
+                    @if (hasReadNotifications()) {
+                      <button class="btn-notif-action" (click)="clearReadNotifications()" title="Clear read notifications">
+                        Clear read
+                      </button>
+                    }
+                  </div>
+                </div>
+
                 <div class="dropdown-body">
-                  @for (notif of unreadNotifications(); track notif.id) {
+                  @for (notif of filteredNotifications(); track notif.id) {
                     <div class="notification-item" [class.unread]="!notif.isRead">
                       <div class="notification-content">
-                        <strong>{{ notif.title }}</strong>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                          <strong [style.color]="!notif.isRead ? 'var(--color-primary)' : 'inherit'">{{ notif.title }}</strong>
+                          @if (!notif.isRead) {
+                            <span class="unread-dot-indicator"></span>
+                          }
+                        </div>
                         <p>{{ notif.message }}</p>
                         <span class="notification-time">{{ notif.createdAt | date:'MMM d, h:mm a' }}</span>
                       </div>
@@ -249,12 +284,14 @@
                           <button class="btn-approve-req" (click)="approveRequest(notif.requestId)">Approve</button>
                           <button class="btn-deny-req" (click)="openDenialModal(notif.requestId)">Deny</button>
                         } @else if (!notif.isRead) {
-                          <button class="btn-mark-read" (click)="markNotificationRead(notif.id)">✓</button>
+                          <button class="btn-mark-read" (click)="markNotificationRead(notif.id)">Mark read</button>
                         }
                       </div>
                     </div>
                   } @empty {
-                    <p class="empty-notifications-text">No new alerts.</p>
+                    <p class="empty-notifications-text">
+                      {{ notificationFilter() === 'UNREAD' ? 'No unread alerts.' : 'No notifications yet.' }}
+                    </p>
                   }
                 </div>
               </div>

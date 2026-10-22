@@ -21,6 +21,14 @@ export class NotificationService {
     return this.http.patch<void>(`${this.apiBaseUrl}/notifications/${id}/read`, {});
   }
 
+  markAllAsRead(): Observable<void> {
+    return this.http.patch<void>(`${this.apiBaseUrl}/notifications/read-all`, {});
+  }
+
+  clearRead(): Observable<void> {
+    return this.http.delete<void>(`${this.apiBaseUrl}/notifications/clear-read`);
+  }
+
   createJoinRequest(teamId: string, adminId: string): Observable<any> {
     return this.http.post<any>(`${this.apiBaseUrl}/join-requests`, { teamId, adminId });
   }

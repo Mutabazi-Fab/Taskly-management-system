@@ -50,6 +50,14 @@ export class DashboardComponent implements OnInit {
   notifications = signal<any[]>([]);
   unreadNotifications = computed(() => this.notifications().filter(n => !n.isRead));
   unreadNotificationsCount = computed(() => this.unreadNotifications().length);
+  hasReadNotifications = computed(() => this.notifications().some(n => n.isRead));
+  notificationFilter = signal<'UNREAD' | 'ALL'>('UNREAD');
+  filteredNotifications = computed(() => {
+    if (this.notificationFilter() === 'UNREAD') {
+      return this.unreadNotifications();
+    }
+    return this.notifications();
+  });
   showNotificationsDropdown = signal(false);
 
   // Request to Join modal state
@@ -790,6 +798,28 @@ export class DashboardComponent implements OnInit {
       next: () => {
         this.loadNotifications();
       }
+    });
+  }
+
+  markAllNotificationsRead(): void {
+    if (this.unreadNotificationsCount() === 0) return;
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.showToast('All notifications marked as read.', 'success');
+        this.loadNotifications();
+      },
+      error: (err) => this.showToast(err.error?.message || 'Failed to mark all as read.', 'danger')
+    });
+  }
+
+  clearReadNotifications(): void {
+    if (!this.hasReadNotifications()) return;
+    this.notificationService.clearRead().subscribe({
+      next: () => {
+        this.showToast('Read notifications cleared.', 'info');
+        this.loadNotifications();
+      },
+      error: (err) => this.showToast(err.error?.message || 'Failed to clear read notifications.', 'danger')
     });
   }
 
