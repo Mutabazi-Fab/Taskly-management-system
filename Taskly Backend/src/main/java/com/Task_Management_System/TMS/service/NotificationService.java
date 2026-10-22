@@ -9,5 +9,7 @@ import java.util.UUID;
 public interface NotificationService {
     List<NotificationResponseDto> getUserNotifications(UUID userId);
     void markAsRead(UUID userId, UUID notificationId);
+    void markAllAsRead(UUID userId);
+    void clearAllRead(UUID userId);
     void createNotification(User user, String title, String message, String type, UUID requestId);
 }

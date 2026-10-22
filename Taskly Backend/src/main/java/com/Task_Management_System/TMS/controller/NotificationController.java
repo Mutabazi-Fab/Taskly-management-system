@@ -35,6 +35,20 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/read-all")
+    public ResponseEntity<Void> markAllNotificationsRead(Authentication authentication) {
+        User currentUser = getCurrentUser(authentication);
+        notificationService.markAllAsRead(currentUser.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/clear-read")
+    public ResponseEntity<Void> clearAllReadNotifications(Authentication authentication) {
+        User currentUser = getCurrentUser(authentication);
+        notificationService.clearAllRead(currentUser.getId());
+        return ResponseEntity.ok().build();
+    }
+
     private User getCurrentUser(Authentication authentication) {
         String email = authentication.getName();
         return userRepository.findByEmail(email)

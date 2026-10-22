@@ -57,6 +57,28 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
+    public void markAllAsRead(UUID userId) {
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        for (Notification n : notifications) {
+            if (!n.isRead()) {
+                n.setRead(true);
+            }
+        }
+        notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    @Transactional
+    public void clearAllRead(UUID userId) {
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        List<Notification> readNotifications = notifications.stream()
+                .filter(Notification::isRead)
+                .collect(Collectors.toList());
+        notificationRepository.deleteAll(readNotifications);
+    }
+
+    @Override
+    @Transactional
     public void createNotification(User user, String title, String message, String type, UUID requestId) {
         Notification notification = Notification.builder()
                 .user(user)
