@@ -758,6 +758,25 @@
   background-color: var(--color-primary-hover);
 }
 
+.btn-outline-sm {
+  background-color: #FFFFFF;
+  color: var(--color-primary);
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(52, 71, 170, 0.25);
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  transition: var(--transition-smooth);
+}
+
+.btn-outline-sm:hover {
+  background-color: rgba(52, 71, 170, 0.06);
+  border-color: var(--color-primary);
+}
+
 /* ==========================================
    REDESIGNED DASHBOARD OVERVIEW & WIDGETS
    ========================================== */

@@ -534,6 +534,61 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  exportBoardToCSV(): void {
+    const board = this.selectedBoard();
+    if (!board) return;
+
+    const currentLists = this.lists();
+    const map = this.tasksMap();
+    const users = this.allUsers();
+
+    const rows: string[][] = [
+      ['Column', 'Task Title', 'Description', 'Priority', 'Status', 'Due Date', 'Assignee']
+    ];
+
+    let totalTasksCount = 0;
+    for (const list of currentLists) {
+      const tasks = map[list.id] || [];
+      totalTasksCount += tasks.length;
+      for (const t of tasks) {
+        const assignee = users.find(u => u.id === t.assigneeId);
+        const assigneeName = assignee ? assignee.username : 'Unassigned';
+        rows.push([
+          list.name,
+          t.title || '',
+          t.description || '',
+          t.priority || '',
+          t.status || '',
+          t.dueDate ? t.dueDate.substring(0, 10) : '',
+          assigneeName
+        ]);
+      }
+    }
+
+    if (totalTasksCount === 0) {
+      this.showToast('No tasks to export in this board.', 'info');
+      return;
+    }
+
+    const csvContent = rows.map(row => 
+      row.map(val => `"${val.replace(/"/g, '""')}"`).join(',')
+    ).join('\r\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const safeBoardName = board.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const dateStr = new Date().toISOString().substring(0, 10);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${safeBoardName}_tasks_${dateStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    this.showToast(`Exported ${totalTasksCount} tasks to CSV successfully!`, 'success');
+  }
+
   openCreateTaskModal(listId: string): void {
     this.selectedListForNewTask.set(listId);
     this.showCreateTask.set(true);
