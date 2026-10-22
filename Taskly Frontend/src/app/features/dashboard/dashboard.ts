@@ -844,6 +844,48 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  hasCompletedTasks(listId: string): boolean {
+    const tasks = this.tasksMap()[listId] || [];
+    return tasks.some(t => t.status === 'DONE');
+  }
+
+  clearCompletedTasksInList(listId: string, listName: string): void {
+    const tasks = this.tasksMap()[listId] || [];
+    const completedTasks = tasks.filter(t => t.status === 'DONE');
+    if (completedTasks.length === 0) {
+      this.showToast('No completed tasks in this column.', 'info');
+      return;
+    }
+
+    this.triggerConfirm(
+      `Delete all ${completedTasks.length} completed task(s) from "${listName}"?`,
+      () => {
+        let remaining = completedTasks.length;
+        for (const task of completedTasks) {
+          this.taskService.deleteTask(task.id).subscribe({
+            next: () => {
+              remaining--;
+              if (remaining === 0) {
+                this.showToast(`Cleared ${completedTasks.length} completed task(s) from "${listName}".`, 'success');
+                const board = this.selectedBoard();
+                if (board) this.loadBoardData(board.id);
+                this.loadMyTasks();
+                this.loadAllTasks();
+              }
+            },
+            error: () => {
+              remaining--;
+              if (remaining === 0) {
+                const board = this.selectedBoard();
+                if (board) this.loadBoardData(board.id);
+              }
+            }
+          });
+        }
+      }
+    );
+  }
+
   // SVG stats stroke math calculations
   getStrokeDashArray(count: number): string {
     const stats = this.boardStats();
