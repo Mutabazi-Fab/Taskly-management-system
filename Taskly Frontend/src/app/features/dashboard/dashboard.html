@@ -716,27 +716,61 @@
 
         <!-- Filters Bar -->
         <section class="filter-bar glass-card">
-          <div class="filter-group">
-            <label>Priority:</label>
-            <select [ngModel]="selectedPriorityFilter()" (ngModelChange)="selectedPriorityFilter.set($event)">
-              <option value="ALL">All Priorities</option>
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-            </select>
+          <div class="filter-bar-left">
+            <div class="priority-chips-group">
+              <span class="filter-label">Priority:</span>
+              <div class="priority-chips">
+                <button 
+                  type="button"
+                  class="priority-chip" 
+                  [class.active]="selectedPriorityFilter() === 'ALL'" 
+                  (click)="selectedPriorityFilter.set('ALL')">
+                  All
+                </button>
+                <button 
+                  type="button"
+                  class="priority-chip chip-high" 
+                  [class.active]="selectedPriorityFilter() === 'HIGH'" 
+                  (click)="selectedPriorityFilter.set('HIGH')">
+                  High
+                </button>
+                <button 
+                  type="button"
+                  class="priority-chip chip-medium" 
+                  [class.active]="selectedPriorityFilter() === 'MEDIUM'" 
+                  (click)="selectedPriorityFilter.set('MEDIUM')">
+                  Medium
+                </button>
+                <button 
+                  type="button"
+                  class="priority-chip chip-low" 
+                  [class.active]="selectedPriorityFilter() === 'LOW'" 
+                  (click)="selectedPriorityFilter.set('LOW')">
+                  Low
+                </button>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label>Assignee:</label>
+              <select [ngModel]="selectedAssigneeFilter()" (ngModelChange)="selectedAssigneeFilter.set($event)">
+                <option value="ALL">All Assignees</option>
+                @for (user of allUsers(); track user.id) {
+                  <option [value]="user.id">{{ user.username }}</option>
+                }
+              </select>
+            </div>
+
+            @if (selectedPriorityFilter() !== 'ALL' || selectedAssigneeFilter() !== 'ALL') {
+              <button type="button" class="btn-reset-filters" (click)="selectedPriorityFilter.set('ALL'); selectedAssigneeFilter.set('ALL')">
+                Reset Filters
+              </button>
+            }
           </div>
 
-          <div class="filter-group">
-            <label>Assignee:</label>
-            <select [ngModel]="selectedAssigneeFilter()" (ngModelChange)="selectedAssigneeFilter.set($event)">
-              <option value="ALL">All Assignees</option>
-              @for (user of allUsers(); track user.id) {
-                <option [value]="user.id">{{ user.username }}</option>
-              }
-            </select>
+          <div class="filter-bar-right">
+            <button class="btn-primary-sm add-list-btn" (click)="showCreateList.set(true)">+ Add Column</button>
           </div>
-
-          <button class="btn-primary-sm add-list-btn" (click)="showCreateList.set(true)">+ Add Column</button>
         </section>
 
         <!-- Column Grid columns -->

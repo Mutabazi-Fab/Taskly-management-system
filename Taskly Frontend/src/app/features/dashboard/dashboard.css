@@ -275,31 +275,115 @@
 .filter-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 20px;
-  padding: 16px 24px;
+  padding: 14px 20px;
   margin-bottom: 24px;
   background: #FFFFFF;
   border: 1px solid rgba(52, 71, 170, 0.1);
+  flex-wrap: wrap;
+}
+
+.filter-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.priority-chips-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-label {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.priority-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.priority-chip {
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid rgba(52, 71, 170, 0.15);
+  background: #FFFFFF;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.priority-chip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.priority-chip.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #FFFFFF;
+}
+
+.priority-chip.chip-high.active {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #FFFFFF;
+}
+
+.priority-chip.chip-medium.active {
+  background: var(--color-warning);
+  border-color: var(--color-warning);
+  color: #FFFFFF;
+}
+
+.priority-chip.chip-low.active {
+  background: #10B981;
+  border-color: #10B981;
+  color: #FFFFFF;
+}
+
+.btn-reset-filters {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
 }
 
 .filter-group {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .filter-group label {
   color: var(--color-text-muted);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .filter-group select {
-  padding: 6px 12px;
-  font-size: 0.85rem;
+  padding: 5px 10px;
+  font-size: 0.82rem;
+  border-radius: 8px;
+  border: 1px solid rgba(52, 71, 170, 0.15);
+  background: #FFFFFF;
 }
 
-.add-list-btn {
+.filter-bar-right {
+  display: flex;
+  align-items: center;
   margin-left: auto;
 }
 
