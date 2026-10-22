@@ -178,6 +178,32 @@ export class DashboardComponent implements OnInit {
     return new Date(task.dueDate) < now;
   }
 
+  getDueDateBadge(dueDate?: string, status?: TaskStatus): { text: string; type: 'overdue' | 'today' | 'tomorrow' | 'upcoming' | 'done' } | null {
+    if (!dueDate) return null;
+    if (status === 'DONE') {
+      return { text: 'Done', type: 'done' };
+    }
+    const due = new Date(dueDate);
+    const now = new Date();
+    due.setHours(0, 0, 0, 0);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    const diffTime = due.getTime() - today.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      const absDays = Math.abs(diffDays);
+      return { text: absDays === 1 ? 'Overdue' : `${absDays}d late`, type: 'overdue' };
+    } else if (diffDays === 0) {
+      return { text: 'Today', type: 'today' };
+    } else if (diffDays === 1) {
+      return { text: 'Tomorrow', type: 'tomorrow' };
+    } else if (diffDays <= 7) {
+      return { text: `In ${diffDays}d`, type: 'upcoming' };
+    }
+    return null;
+  }
+
   // Calculate dynamic team activities from actual database tasks
   teamActivities = computed(() => {
     const users = this.allUsers();

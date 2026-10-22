@@ -579,7 +579,12 @@
                   <span class="priority-badge" [class]="task.priority.toLowerCase()">
                     {{ task.priority }}
                   </span>
-                  <span class="task-date">{{ task.dueDate | date:'mediumDate' }}</span>
+                  <span class="task-date">
+                    {{ task.dueDate | date:'mediumDate' }}
+                    @if (getDueDateBadge(task.dueDate, task.status); as badge) {
+                      <span class="countdown-pill" [class]="badge.type">{{ badge.text }}</span>
+                    }
+                  </span>
                 </div>
               } @empty {
                 <p class="empty-widget-text">No tasks assigned to you yet.</p>
@@ -821,7 +826,10 @@
                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          {{ task.dueDate | date:'MMM d' }}
+                          <span>{{ task.dueDate | date:'MMM d' }}</span>
+                          @if (getDueDateBadge(task.dueDate, task.status); as badge) {
+                            <span class="countdown-pill" [class]="badge.type">{{ badge.text }}</span>
+                          }
                         }
                       </div>
 
