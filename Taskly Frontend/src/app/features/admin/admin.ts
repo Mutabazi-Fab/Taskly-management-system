@@ -1,13 +1,14 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './admin.html',
   styleUrl: './admin.css'
 })
@@ -18,6 +19,34 @@ export class AdminComponent implements OnInit {
   users = signal<User[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
+
+  // Search and filter state
+  searchQuery = signal('');
+  roleFilter = signal<'ALL' | 'ADMIN' | 'STANDARD'>('ALL');
+
+  adminCount = computed(() => this.users().filter(u => u.admin).length);
+  standardCount = computed(() => this.users().filter(u => !u.admin).length);
+
+  filteredUsers = computed(() => {
+    let list = this.users();
+    const query = this.searchQuery().trim().toLowerCase();
+    const role = this.roleFilter();
+
+    if (role === 'ADMIN') {
+      list = list.filter(u => u.admin);
+    } else if (role === 'STANDARD') {
+      list = list.filter(u => !u.admin);
+    }
+
+    if (query) {
+      list = list.filter(u => 
+        (u.username && u.username.toLowerCase().includes(query)) ||
+        (u.email && u.email.toLowerCase().includes(query))
+      );
+    }
+
+    return list;
+  });
 
   ngOnInit(): void {
     this.loadUsers();

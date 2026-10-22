@@ -26,6 +26,49 @@
       }
     </div>
 
+    <!-- Admin Search & Filter Toolbar -->
+    <div class="admin-toolbar">
+      <div class="admin-search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Search by username or email..." 
+          [ngModel]="searchQuery()" 
+          (ngModelChange)="searchQuery.set($event)" 
+        />
+        @if (searchQuery()) {
+          <button class="btn-clear-search" (click)="searchQuery.set('')" title="Clear Search">×</button>
+        }
+      </div>
+
+      <div class="role-filter-chips">
+        <button 
+          type="button"
+          class="role-filter-chip" 
+          [class.active]="roleFilter() === 'ALL'" 
+          (click)="roleFilter.set('ALL')">
+          All ({{ users().length }})
+        </button>
+        <button 
+          type="button"
+          class="role-filter-chip chip-admin" 
+          [class.active]="roleFilter() === 'ADMIN'" 
+          (click)="roleFilter.set('ADMIN')">
+          Admins ({{ adminCount() }})
+        </button>
+        <button 
+          type="button"
+          class="role-filter-chip chip-standard" 
+          [class.active]="roleFilter() === 'STANDARD'" 
+          (click)="roleFilter.set('STANDARD')">
+          Standard Users ({{ standardCount() }})
+        </button>
+      </div>
+    </div>
+
     <table class="users-table">
       <thead>
         <tr>
@@ -37,7 +80,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (user of users(); track user.id) {
+        @for (user of filteredUsers(); track user.id) {
           <tr>
             <td>
               <div class="user-info">
@@ -71,7 +114,9 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="5" class="empty-row">No users registered in the system.</td>
+            <td colspan="5" class="empty-row">
+              {{ searchQuery() || roleFilter() !== 'ALL' ? 'No users matching the filter criteria.' : 'No users registered in the system.' }}
+            </td>
           </tr>
         }
       </tbody>
