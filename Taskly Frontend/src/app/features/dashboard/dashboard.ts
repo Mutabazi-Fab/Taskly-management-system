@@ -46,6 +46,23 @@ export class DashboardComponent implements OnInit {
   // Tab View selector
   activeTab = signal<'DASHBOARD' | 'MY_TASKS' | 'BOARDS' | 'CALENDAR' | 'TEAM' | 'REPORTS' | 'SETTINGS'>('DASHBOARD');
 
+  // Workspace & Profile Preferences
+  userAvatarColor = signal<string>(localStorage.getItem('taskly_avatar_color') || '#3447AA');
+  avatarColorOptions = ['#3447AA', '#7C3AED', '#EC4899', '#10B981', '#F59E0B', '#3B82F6', '#EF4444'];
+  preferredLandingTab = signal<string>(localStorage.getItem('taskly_pref_tab') || 'DASHBOARD');
+
+  setAvatarColor(color: string): void {
+    this.userAvatarColor.set(color);
+    localStorage.setItem('taskly_avatar_color', color);
+    this.showToast('Profile avatar accent updated!', 'success');
+  }
+
+  setPreferredLandingTab(tab: string): void {
+    this.preferredLandingTab.set(tab);
+    localStorage.setItem('taskly_pref_tab', tab);
+    this.showToast('Default workspace view preference saved!', 'success');
+  }
+
   // Notifications state
   notifications = signal<any[]>([]);
   unreadNotifications = computed(() => this.notifications().filter(n => !n.isRead));
@@ -330,6 +347,10 @@ export class DashboardComponent implements OnInit {
   newTaskAssigneeId = signal('');
 
   ngOnInit(): void {
+    const savedPrefTab = localStorage.getItem('taskly_pref_tab');
+    if (savedPrefTab && ['DASHBOARD', 'MY_TASKS', 'BOARDS', 'CALENDAR', 'REPORTS'].includes(savedPrefTab)) {
+      this.activeTab.set(savedPrefTab as any);
+    }
     this.loadTeams();
     this.loadMyTasks();
     this.loadAllUsers();

@@ -300,7 +300,7 @@
 
           <!-- User Profile Avatar Circle -->
           <div class="profile-avatar-container">
-            <button class="profile-avatar-btn" (click)="showProfileDropdown.set(!showProfileDropdown())">
+            <button class="profile-avatar-btn" [style.background]="userAvatarColor()" (click)="showProfileDropdown.set(!showProfileDropdown())">
               {{ currentUser()?.username?.substring(0, 1)?.toUpperCase() }}
             </button>
             
@@ -1119,22 +1119,115 @@
            VIEW 5: SETTINGS & ACCOUNT PANEL
            ========================================== -->
       @if (activeTab() === 'SETTINGS') {
-        <section class="settings-panel glass-card" style="margin-top: 20px; padding: 40px; max-width: 700px; display: flex; flex-direction: column; gap: 24px;">
-          <h3>Account Settings</h3>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted);">Username</label>
-            <input type="text" [value]="currentUser()?.username" readonly style="background: #F1F5F9; color: var(--color-text-muted);" />
+        <section class="settings-panel glass-card">
+          <div class="settings-profile-header">
+            <div class="settings-avatar-large" [style.background]="userAvatarColor()">
+              {{ currentUser()?.username?.substring(0, 1)?.toUpperCase() }}
+            </div>
+            <div class="settings-profile-info">
+              <h3>{{ currentUser()?.username }}</h3>
+              <p class="settings-profile-email">{{ currentUser()?.email }}</p>
+              <span class="settings-role-badge" [class.badge-admin]="currentUser()?.admin">
+                {{ currentUser()?.admin ? 'System Administrator' : 'Standard Member' }}
+              </span>
+            </div>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted);">Email Address</label>
-            <input type="text" [value]="currentUser()?.email" readonly style="background: #F1F5F9; color: var(--color-text-muted);" />
+
+          <div class="settings-divider"></div>
+
+          <!-- Section: Avatar Accent Customization -->
+          <div class="settings-section">
+            <h4 class="settings-section-title">Avatar Accent Color</h4>
+            <p class="settings-section-desc">Personalize your avatar badge accent color across the workspace.</p>
+            <div class="color-swatches">
+              @for (color of avatarColorOptions; track color) {
+                <button
+                  type="button"
+                  class="color-swatch"
+                  [style.background]="color"
+                  [class.active]="userAvatarColor() === color"
+                  (click)="setAvatarColor(color)"
+                  [title]="color">
+                  @if (userAvatarColor() === color) {
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  }
+                </button>
+              }
+            </div>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted);">Account Level</label>
-            <input type="text" [value]="currentUser()?.admin ? 'System Administrator' : 'Standard User'" readonly style="background: #F1F5F9; color: var(--color-text-muted);" />
+
+          <!-- Section: Default Workspace Landing View -->
+          <div class="settings-section">
+            <h4 class="settings-section-title">Default Workspace View</h4>
+            <p class="settings-section-desc">Choose which workspace view automatically opens upon launching Taskly.</p>
+            <div class="pref-chips">
+              <button
+                type="button"
+                class="pref-chip"
+                [class.active]="preferredLandingTab() === 'DASHBOARD'"
+                (click)="setPreferredLandingTab('DASHBOARD')">
+                Dashboard
+              </button>
+              <button
+                type="button"
+                class="pref-chip"
+                [class.active]="preferredLandingTab() === 'BOARDS'"
+                (click)="setPreferredLandingTab('BOARDS')">
+                Kanban Boards
+              </button>
+              <button
+                type="button"
+                class="pref-chip"
+                [class.active]="preferredLandingTab() === 'MY_TASKS'"
+                (click)="setPreferredLandingTab('MY_TASKS')">
+                My Tasks
+              </button>
+              <button
+                type="button"
+                class="pref-chip"
+                [class.active]="preferredLandingTab() === 'CALENDAR'"
+                (click)="setPreferredLandingTab('CALENDAR')">
+                Calendar
+              </button>
+              <button
+                type="button"
+                class="pref-chip"
+                [class.active]="preferredLandingTab() === 'REPORTS'"
+                (click)="setPreferredLandingTab('REPORTS')">
+                Reports
+              </button>
+            </div>
           </div>
-          <div style="margin-top: 10px;">
-            <button class="btn-primary" (click)="logout()">Sign Out of Account</button>
+
+          <div class="settings-divider"></div>
+
+          <!-- Section: Account Information -->
+          <div class="settings-section">
+            <h4 class="settings-section-title">Account Details</h4>
+            <div class="settings-grid">
+              <div class="settings-field">
+                <label>Username</label>
+                <input type="text" [value]="currentUser()?.username" readonly class="settings-input-readonly" />
+              </div>
+              <div class="settings-field">
+                <label>Email Address</label>
+                <input type="text" [value]="currentUser()?.email" readonly class="settings-input-readonly" />
+              </div>
+              <div class="settings-field">
+                <label>Access Role</label>
+                <input type="text" [value]="currentUser()?.admin ? 'System Administrator' : 'Standard User'" readonly class="settings-input-readonly" />
+              </div>
+              <div class="settings-field">
+                <label>User ID</label>
+                <input type="text" [value]="currentUser()?.id" readonly class="settings-input-readonly" />
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button class="btn-signout" (click)="logout()">Sign Out of Account</button>
           </div>
         </section>
       }
