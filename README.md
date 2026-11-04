@@ -1,8 +1,36 @@
 # Taskly - Collaborative Task & Workspace Management System
 
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.x-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)](https://angular.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+
 Taskly is a modern, full-stack collaborative Task Management System (TMS) engineered for agile teams and organizations to manage project workflows, track deliverables, balance team workloads, and visualize upcoming deadlines.
 
 Architected with a decoupled Spring Boot REST backend and an Angular reactive single-page client, Taskly is designed both for modular local development and unified single-container deployment (e.g., on Railway, Render, or Docker).
+
+---
+
+## Architecture Overview
+
+```mermaid
+graph TD
+    Client["Client Browser (Angular 21 SPA)"] -->|REST / JSON with JWT Bearer| Backend["Spring Boot 4.x Backend"]
+    Backend -->|Spring Data JPA / Hibernate| DB[(PostgreSQL Database)]
+
+    subgraph "Frontend Layer"
+        Client --> AuthG[Route Guards: authGuard, adminGuard]
+        Client --> Interceptor[Functional JWT Interceptor]
+        Client --> Signals[Reactive Signals State Management]
+    end
+
+    subgraph "Backend API Layer"
+        Backend --> SecFilter[SecurityFilterChain & JwtAuthenticationFilter]
+        Backend --> REST[REST Controllers: Auth, Users, Teams, Boards, Tasks, Notifications]
+        Backend --> SPA[SpaRedirectConfig - Single-Container Forwarding]
+    end
+```
 
 ---
 
@@ -37,7 +65,8 @@ Architected with a decoupled Spring Boot REST backend and an Angular reactive si
   * In-line quick approval or denial with reason prompts.
   * One-click "Mark All as Read" and "Clear Read" controls.
 
-### 6. User Customization & Experience
+### 6. Authentication & User Customization
+* **Secure Auth Experience:** Registration and login with real-time password strength meter, password confirmation validation, show/hide password toggle, and "Remember Me" credentials persistence.
 * **Avatar Accent Customization:** Personalized avatar colors persisted in client storage across top headers and profile cards.
 * **Default Landing View Preference:** Configure whether Taskly opens to the Dashboard, Kanban Boards, My Tasks, Calendar, or Reports.
 * **Design System:** Royal Blue palette (`#3447AA`), glassmorphism card surfaces, custom floating toasts, and confirmation dialogs with no native browser alert popups.
@@ -48,7 +77,7 @@ Architected with a decoupled Spring Boot REST backend and an Angular reactive si
 
 ### Backend
 * **Language & Runtime:** Java 21
-* **Framework:** Spring Boot 4.x / 3.x (`spring-boot-starter-webmvc`, `spring-boot-starter-data-jpa`)
+* **Framework:** Spring Boot 4.x (`spring-boot-starter-webmvc`, `spring-boot-starter-data-jpa`)
 * **Security:** Spring Security with stateless JWT (JSON Web Token via JJWT `0.11.5`)
 * **Validation:** Jakarta Validation API
 * **Database Driver & ORM:** PostgreSQL Driver with Hibernate
@@ -102,15 +131,28 @@ Before setting up Taskly locally, make sure you have:
 
 ---
 
+## Environment Variables
+
+| Variable | Default Value | Description |
+| :--- | :--- | :--- |
+| `PORT` | `8080` | Server listening port |
+| `DATABASE_HOST` | `localhost` | PostgreSQL host address |
+| `DATABASE_PORT` | `5432` | PostgreSQL port |
+| `DATABASE_NAME` | `task_mgt_db` | Target PostgreSQL database name |
+| `DATABASE_USER` | `postgres` | Database username |
+| `DATABASE_PASSWORD` | `123` | Database user password |
+
+---
+
 ## Getting Started Locally
 
 ### 1. Database Setup
-Create a PostgreSQL database (default name `task_mgt_db`):
+Create a PostgreSQL database:
 ```sql
 CREATE DATABASE task_mgt_db;
 ```
 
-Update your connection credentials in `Taskly Backend/src/main/resources/application.properties` (or supply them via environment variables):
+Update your connection credentials in `Taskly Backend/src/main/resources/application.properties` (or set the environment variables listed above):
 ```properties
 spring.datasource.url=jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:task_mgt_db}
 spring.datasource.username=${DATABASE_USER:postgres}
