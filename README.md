@@ -1,123 +1,198 @@
-# Taskly - Project Management & Collaboration Workspace
+# Taskly - Collaborative Task & Workspace Management System
 
-Taskly is a robust, full-stack collaborative Task Management System (TMS) designed for organizations and teams to track tasks, organize columns, review deadlines, and manage user workloads. 
+Taskly is a modern, full-stack collaborative Task Management System (TMS) engineered for agile teams and organizations to manage project workflows, track deliverables, balance team workloads, and visualize upcoming deadlines.
 
-Built as a decoupled architecture that packages into a unified Spring Boot monorepo for seamless single-instance hosting (e.g., on Railway).
-
----
-
-##  Technology Stack
-* **Backend:** Java 21, Spring Boot 3.x, Spring Security (JWT Stateless Authentication), Spring Data JPA.
-* **Database:** PostgreSQL.
-* **Frontend:** Angular 18+, Reactive signals for state management, Vanilla CSS (Premium glassmorphic styling, HSL colors).
+Architected with a decoupled Spring Boot REST backend and an Angular reactive single-page client, Taskly is designed both for modular local development and unified single-container deployment (e.g., on Railway, Render, or Docker).
 
 ---
 
-##  Features
-1. **Interactive Kanban Board:** Add, rename, or delete columns, create tasks, assign members, filter by priority or assignee, and drag/move tasks across columns.
-2. **Deadline Calendar:** Dynamic visual schedule plotting calendar cards computed from real-time database deadlines.
-3. **Role-Based Permissions:** 
-   * **System Administrators:** Can manage registered users, toggle admin privileges, and create teams.
-   * **Team Owners:** Can add/remove members and delete their team.
-   * **Standard Users:** Can view personal tasks, request to join teams, and work on boards they are member of.
-4. **Team Join Requests:** Standard users can request to join any team. Requests target a selected administrator, updating their in-app notification center.
-5. **In-App Notification Center:** A custom top-right bell dropdown displaying real-time unread alerts.
-   * Admins can approve or deny requests directly from the dropdown. Rejections prompt a reason textbox.
-   * Notifications self-heal and disappear immediately once processed.
-6. **Polished In-App UI Popups:** Uses fully responsive floating toast notifications and center-aligned modal confirmation boxes, completely avoiding default grey browser dialogs.
-7. **Workspace Analytics:** Computed workload statistics card showing active tasks and progress bars per team member.
+## Key Features
+
+### 1. Interactive Kanban Workspace
+* **Flexible Column Management:** Create, rename, reorder, or delete custom workflow columns.
+* **Task Card Management:** Create tasks with rich descriptions, priorities (Low, Medium, High), due dates, and assignees.
+* **Drag-and-Drop Workflow:** Move tasks smoothly between workflow stages.
+* **Quick Filters & Search:** Filter board cards instantly by priority chips (All, High, Medium, Low) or live title/description search.
+* **Batch Column Sweep:** Clear or sweep all completed tasks in a column with one click.
+* **One-Click CSV Export:** Export board task data into standard RFC-4180 CSV format for reporting and spreadsheets.
+
+### 2. Smart Due Date Intelligence & Calendar
+* **Relative Countdown Badges:** Visual due date indicators (`Today`, `Tomorrow`, `In Xd`, `Overdue`, `Done`) across board and list views.
+* **Deadline Calendar:** Dynamic visual schedule cards plotted from real-time database deadlines with status filtering (`All`, `Upcoming`, `Overdue`, `Completed`).
+
+### 3. Analytics & Workload Monitoring
+* **Personal KPI Metrics:** Real-time counters for Total Assigned Tasks, In-Progress Tasks, Completed Deliverables, and Completion Rate.
+* **Team Workload Roster:** Live progress bars and active task tallies per team member to balance workload distribution.
+* **Recent Activity Feed:** Computed human-readable audit log tracking task creation, progress updates, and completions.
+
+### 4. Role-Based Access Control (RBAC) & Administration
+* **System Administrators:** Dedicated admin dashboard with live user search, role filter chips (All, Admins, Standard Users), and toggleable administrative privileges.
+* **Team Owners:** Authority to manage member rosters and delete owned teams.
+* **Standard Members:** Access to team boards, personal task views, and team join requests.
+
+### 5. Team Join Requests & Notification Center
+* **Join Requests:** Non-members can request access to existing teams with targeted administrator notifications.
+* **Notification Dropdown:** Real-time alert center in the top navigation with:
+  * Filter tabs (`Unread` vs. `All`).
+  * In-line quick approval or denial with reason prompts.
+  * One-click "Mark All as Read" and "Clear Read" controls.
+
+### 6. User Customization & Experience
+* **Avatar Accent Customization:** Personalized avatar colors persisted in client storage across top headers and profile cards.
+* **Default Landing View Preference:** Configure whether Taskly opens to the Dashboard, Kanban Boards, My Tasks, Calendar, or Reports.
+* **Design System:** Royal Blue palette (`#3447AA`), glassmorphism card surfaces, custom floating toasts, and confirmation dialogs with no native browser alert popups.
 
 ---
 
-##  Project Structure
+## Technology Stack
+
+### Backend
+* **Language & Runtime:** Java 21
+* **Framework:** Spring Boot 4.x / 3.x (`spring-boot-starter-webmvc`, `spring-boot-starter-data-jpa`)
+* **Security:** Spring Security with stateless JWT (JSON Web Token via JJWT `0.11.5`)
+* **Validation:** Jakarta Validation API
+* **Database Driver & ORM:** PostgreSQL Driver with Hibernate
+* **Build Tool:** Apache Maven
+
+### Frontend
+* **Framework:** Angular 21 (Standalone Components, Signals API)
+* **Routing & Guards:** Angular Router with `authGuard` and `adminGuard`
+* **HTTP:** Angular `HttpClient` with functional `jwtInterceptor`
+* **Styling:** Vanilla CSS with design tokens, glassmorphism, and responsive breakpoints
+* **Package Manager:** npm
+
+---
+
+## Project Structure
+
 ```text
 TMS/
 ├── Taskly Backend/                 # Spring Boot REST API
-│   ├── src/main/java/.../
-│   │   ├── config/                 # SPA Redirection & Security Filters
-│   │   ├── controller/             # REST Endpoints (Auth, Boards, Teams, Tasks, Notifications)
-│   │   ├── dto/                    # Request/Response Data Transfer Objects
-│   │   ├── exception/              # Global REST Exception Handlers
-│   │   ├── model/                  # Database Entities (Cascade Deletions configured)
-│   │   ├── repository/             # Database Query Interfaces
-│   │   └── service/                # Business Logic Implementations
+│   ├── src/main/java/com/Task_Management_System/TMS/
+│   │   ├── config/                 # SPA redirection and routing configuration
+│   │   ├── controller/             # REST controllers (Auth, User, Team, Board, Task, Notifications, etc.)
+│   │   ├── dto/                    # Request and response DTO schemas with validation
+│   │   ├── exception/              # Global exception handler & custom exceptions
+│   │   ├── model/                  # JPA entities (User, Team, TeamMember, Board, TaskList, Task, Notification)
+│   │   ├── repository/             # Spring Data JPA repositories
+│   │   ├── security/               # JWT token provider, filters, and SecurityFilterChain
+│   │   └── service/                # Business logic contracts and implementations
 │   └── src/main/resources/
-│       ├── application.properties  # Database credentials & Railway port bindings
-│       └── static/                 # Bundled Angular frontend production assets
+│       ├── application.properties  # Database connection, port binding, and Hibernate configuration
+│       └── static/                 # Production-built Angular bundle for monolithic deployment
 │
-└── Taskly Frontend/                # Angular Single Page Application (SPA)
+└── Taskly Frontend/                # Angular Single Page Application
     ├── src/app/
-    │   ├── core/                   # JWT Interceptors, Auth/Admin Guards, HTTP Services, Models
-    │   ├── features/               # Components (Login, Register, Dashboard, Admin panels)
-    │   └── main.ts                 # App Bootstrapping
-    ├── angular.json                # Increased budgets (30kb/50kb styles limits)
-    └── package.json                # Project dependencies
+    │   ├── core/                   # Interceptors, guards, models, and shared HTTP services
+    │   ├── features/               # Feature views (login, register, dashboard, admin)
+    │   └── app.routes.ts           # Client route definitions
+    ├── angular.json                # Angular CLI configuration and asset budgets
+    └── package.json                # Frontend dependencies and npm scripts
 ```
 
 ---
 
-##  Prerequisites
-Ensure you have the following installed on your local machine:
-* **JDK 17 or higher** (JDK 21 recommended)
-* **Node.js** (v18.x or higher) & **npm** (v9.x or higher)
-* **Maven 3.8+**
-* **PostgreSQL** instance running locally or hosted online.
+## Prerequisites
+
+Before setting up Taskly locally, make sure you have:
+* **JDK 21** installed and configured in your `PATH`
+* **Node.js** (v18.x or v20.x+) & **npm**
+* **Maven 3.8+** (or use the Maven wrapper if available)
+* **PostgreSQL 14+** running locally or a cloud database instance (e.g., Supabase, Neon, Railway)
 
 ---
 
-##  How to Run Locally
+## Getting Started Locally
 
 ### 1. Database Setup
-Create a PostgreSQL database named `taskly`:
+Create a PostgreSQL database (default name `task_mgt_db`):
 ```sql
-CREATE DATABASE taskly;
-```
-Configure your credentials in `Taskly Backend/src/main/resources/application.properties`:
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/taskly
-spring.datasource.username=your_username
-spring.datasource.password=your_password
+CREATE DATABASE task_mgt_db;
 ```
 
-### 2. Run the Backend
-Open a terminal in the `Taskly Backend` folder and run:
+Update your connection credentials in `Taskly Backend/src/main/resources/application.properties` (or supply them via environment variables):
+```properties
+spring.datasource.url=jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:task_mgt_db}
+spring.datasource.username=${DATABASE_USER:postgres}
+spring.datasource.password=${DATABASE_PASSWORD:your_password}
+```
+
+### 2. Run the Backend API
+From the repository root:
 ```bash
+cd "Taskly Backend"
 mvn spring-boot:run
 ```
-The server will boot up locally on **`http://localhost:8080`**.
+The REST API will start on **`http://localhost:8080`**.
 
-### 3. Run the Frontend
-Open a new terminal in the `Taskly Frontend` folder and run:
+### 3. Run the Frontend Client
+In a separate terminal window:
 ```bash
+cd "Taskly Frontend"
 npm install
 npx ng serve
 ```
-The client dashboard will compile and be available at **`http://localhost:4200`**.
+Access the client application at **`http://localhost:4200`**.
 
 ---
 
-##  Packaging & Deployment (Railway)
-Taskly is configured to deploy both the frontend and backend in a single container.
+## Monolithic Production Build & Deployment
 
-### 1. Compile the Frontend
-Build the optimized production frontend bundle:
+Taskly can be packaged into a single deployable Spring Boot JAR containing the compiled Angular frontend. This eliminates CORS overhead in production and allows single-service hosting on platforms like **Railway**.
+
+### Step 1: Build the Frontend
 ```bash
 cd "Taskly Frontend"
 npx ng build --configuration production
 ```
-This compiles the SPA assets inside `dist/taskly-frontend/browser`.
+The compiled artifacts will be output to `Taskly Frontend/dist/taskly-frontend/browser`.
 
-### 2. Bundle into Backend
-Copy the static assets into the Spring Boot resource static directory:
+### Step 2: Copy Assets to Backend Static Directory
 * **Windows (PowerShell):**
   ```powershell
-  Remove-Item -Recurse -Force "..\Taskly Backend\src\main\resources\static\*"; Copy-Item -Recurse -Force "dist\taskly-frontend\browser\*" "..\Taskly Backend\src\main\resources\static\"
+  Remove-Item -Recurse -Force "..\Taskly Backend\src\main\resources\static\*"
+  Copy-Item -Recurse -Force "dist\taskly-frontend\browser\*" "..\Taskly Backend\src\main\resources\static\"
   ```
-* **macOS/Linux:**
+* **macOS / Linux:**
   ```bash
-  rm -rf "../Taskly Backend/src/main/resources/static/*" && cp -r dist/taskly-frontend/browser/* "../Taskly Backend/src/main/resources/static/"
+  rm -rf "../Taskly Backend/src/main/resources/static/"*
+  cp -r dist/taskly-frontend/browser/* "../Taskly Backend/src/main/resources/static/"
   ```
 
-### 3. Deploy
-Commit your changes and push the project to GitHub. Link the repository to your Railway project. 
-* Railway will read the parent Maven configuration, map the dynamic database connection URL (`JDBC_DATABASE_URL`), bind the internal port (`PORT`), and spin up the complete application under a single URL!
+### Step 3: Package the Spring Boot Executable JAR
+```bash
+cd "Taskly Backend"
+mvn clean package -DskipTests
+```
+The resulting JAR in `target/TMS-0.0.1-SNAPSHOT.jar` serves both the REST endpoints under `/api/**` and the Angular client for all other web routes via `SpaRedirectConfig`.
+
+### Step 4: Deploying to Cloud Providers (e.g., Railway)
+1. Link your GitHub repository to Railway.
+2. Provide the required environment variables:
+   * `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` (or `DATABASE_URL`)
+   * `PORT` (assigned automatically by the platform)
+3. The server will bind to the cloud environment port and serve the full workspace under a single secure domain.
+
+---
+
+## REST API Overview
+
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/login` | Authenticate user credentials and receive JWT | Public |
+| `POST` | `/api/users` | Register a new user account | Public |
+| `GET` | `/api/users` | Retrieve all registered users | Authenticated |
+| `PATCH` | `/api/users/{id}/admin` | Promote or demote user administrator status | Admin Only |
+| `GET` | `/api/teams` | List all teams | Authenticated |
+| `POST` | `/api/teams` | Create a new team workspace | Authenticated |
+| `DELETE`| `/api/teams/{id}` | Delete a team | Owner / Admin |
+| `GET` | `/api/boards/{boardId}/lists` | Retrieve all column lists for a board | Authenticated |
+| `POST` | `/api/lists/{listId}/tasks` | Create a task within a column | Authenticated |
+| `PATCH` | `/api/tasks/{id}/status` | Update task workflow status | Authenticated |
+| `DELETE`| `/api/tasks/{id}` | Delete task | Authenticated |
+| `GET` | `/api/notifications` | Fetch notifications for current user | Authenticated |
+| `PATCH` | `/api/notifications/read-all`| Mark all notifications as read | Authenticated |
+| `DELETE`| `/api/notifications/clear-read`| Clear read notifications | Authenticated |
+| `POST` | `/api/join-requests` | Submit request to join a team | Authenticated |
+| `POST` | `/api/join-requests/{id}/approve` | Approve a pending join request | Admin |
+| `POST` | `/api/join-requests/{id}/deny` | Deny a pending join request with reason | Admin |
