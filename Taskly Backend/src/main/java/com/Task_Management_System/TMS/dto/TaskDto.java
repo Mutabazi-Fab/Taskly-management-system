@@ -4,6 +4,7 @@ import com.Task_Management_System.TMS.model.TaskPriority;
 import com.Task_Management_System.TMS.model.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -17,8 +18,10 @@ import java.util.UUID;
 public class TaskDto {
 
     @NotBlank(message = "Task title is required")
+    @Size(min = 1, max = 150, message = "Task title must not exceed 150 characters")
     private String title;
 
+    @Size(max = 2000, message = "Task description must not exceed 2000 characters")
     private String description;
 
     private TaskStatus status;
