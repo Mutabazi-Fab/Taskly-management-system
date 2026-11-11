@@ -208,7 +208,7 @@ mvn clean package -DskipTests
 ```
 The resulting JAR in `target/TMS-0.0.1-SNAPSHOT.jar` serves both the REST endpoints under `/api/**` and the Angular client for all other web routes via `SpaRedirectConfig`.
 
-### Step 4: Deploying to Cloud Providers (e.g., Railway)
+### Step 4: Deploying to Cloud Providers (e.g, Railway,render, Supabase)
 1. Link your GitHub repository to Railway.
 2. Provide the required environment variables:
    * `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` (or `DATABASE_URL`)
