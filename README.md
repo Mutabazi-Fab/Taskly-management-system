@@ -141,6 +141,10 @@ Before setting up Taskly locally, make sure you have:
 | `DATABASE_NAME` | `task_mgt_db` | Target PostgreSQL database name |
 | `DATABASE_USER` | `postgres` | Database username |
 | `DATABASE_PASSWORD` | `123` | Database user password |
+| `JWT_SECRET` | *(random per startup)* | Secret used to sign login tokens, at least 32 characters. **Required in production**: without it, a random key is generated and everyone is logged out on each restart |
+| `JWT_EXPIRATION_MS` | `86400000` | Token lifetime in milliseconds (default 24 hours) |
+
+Generate a strong secret with `openssl rand -base64 48` (or PowerShell: `[Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Maximum 256 }))`).
 
 ---
 
@@ -212,6 +216,7 @@ The resulting JAR in `target/TMS-0.0.1-SNAPSHOT.jar` serves both the REST endpoi
 1. Link your GitHub repository to Railway.
 2. Provide the required environment variables:
    * `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` (or `DATABASE_URL`)
+   * `JWT_SECRET` (a long random string; see [Environment Variables](#environment-variables))
    * `PORT` (assigned automatically by the platform)
 3. The server will bind to the cloud environment port and serve the full workspace under a single secure domain.
 
