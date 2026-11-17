@@ -23,17 +23,9 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence rawPassword) {
-                return rawPassword.toString();
-            }
-
-            @Override
-            public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                return rawPassword.toString().equals(encodedPassword);
-            }
-        };
+        // BCrypt salts each password and is deliberately slow, so leaked hashes
+        // are expensive to brute-force. Strength 12 = 2^12 hashing rounds.
+        return new BCryptPasswordEncoder(12);
     }
 
     @Bean
