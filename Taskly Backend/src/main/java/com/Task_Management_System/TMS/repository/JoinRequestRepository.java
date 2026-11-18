@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface JoinRequestRepository extends JpaRepository<JoinRequest, UUID> {
     List<JoinRequest> findByTeamId(UUID teamId);
+
+    boolean existsByTeamIdAndRequesterIdAndStatus(UUID teamId, UUID requesterId, String status);
 }
