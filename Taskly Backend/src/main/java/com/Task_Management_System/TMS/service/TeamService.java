@@ -4,12 +4,13 @@ import com.Task_Management_System.TMS.dto.AddMemberDto;
 import com.Task_Management_System.TMS.dto.TeamDto;
 import com.Task_Management_System.TMS.dto.TeamMemberDto;
 import com.Task_Management_System.TMS.dto.TeamResponseDto;
+import com.Task_Management_System.TMS.model.User;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface TeamService {
-    TeamResponseDto createTeam(TeamDto teamDto);
+    TeamResponseDto createTeam(TeamDto teamDto, User owner);
     List<TeamResponseDto> getAllTeams();
     TeamResponseDto getTeamById(UUID id);
     TeamResponseDto updateTeam(UUID id, TeamDto teamDto);

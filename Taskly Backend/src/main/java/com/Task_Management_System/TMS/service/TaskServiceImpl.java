@@ -25,12 +25,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public TaskResponseDto createTask(UUID listId, TaskDto taskDto) {
+    public TaskResponseDto createTask(UUID listId, TaskDto taskDto, User creator) {
         TaskList taskList = taskListRepository.findById(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("TaskList not found with id: " + listId));
-
-        User creator = userRepository.findById(taskDto.getCreatorId())
-                .orElseThrow(() -> new ResourceNotFoundException("Creator User not found with id: " + taskDto.getCreatorId()));
 
         User assignee = null;
         if (taskDto.getAssigneeId() != null) {
@@ -81,9 +78,6 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
 
-        User creator = userRepository.findById(taskDto.getCreatorId())
-                .orElseThrow(() -> new ResourceNotFoundException("Creator User not found with id: " + taskDto.getCreatorId()));
-
         User assignee = null;
         if (taskDto.getAssigneeId() != null) {
             assignee = userRepository.findById(taskDto.getAssigneeId())
@@ -100,7 +94,7 @@ public class TaskServiceImpl implements TaskService {
         }
         task.setDueDate(taskDto.getDueDate());
         task.setAssignee(assignee);
-        task.setCreator(creator);
+        // The creator is fixed when the task is created and never changes on edit
 
         Task updatedTask = taskRepository.save(task);
         return mapToResponseDto(updatedTask);

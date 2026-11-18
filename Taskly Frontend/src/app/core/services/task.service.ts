@@ -17,7 +17,6 @@ export class TaskService {
     description: string;
     priority: string;
     dueDate: string;
-    creatorId: string;
     assigneeId: string | null;
   }): Observable<Task> {
     return this.http.post<Task>(`${this.apiBaseUrl}/lists/${listId}/tasks`, task);

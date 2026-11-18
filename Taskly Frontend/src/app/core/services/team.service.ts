@@ -12,7 +12,8 @@ export class TeamService {
       ? 'http://localhost:8080/api'
       : '/api') + '/teams';
 
-  createTeam(team: { name: string; ownerId: string }): Observable<Team> {
+  // The backend makes the logged-in user the owner, so no ownerId is sent
+  createTeam(team: { name: string }): Observable<Team> {
     return this.http.post<Team>(this.apiUrl, team);
   }
 

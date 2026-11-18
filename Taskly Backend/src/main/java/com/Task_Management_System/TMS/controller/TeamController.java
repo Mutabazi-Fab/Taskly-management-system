@@ -4,17 +4,17 @@ import com.Task_Management_System.TMS.dto.AddMemberDto;
 import com.Task_Management_System.TMS.dto.TeamDto;
 import com.Task_Management_System.TMS.dto.TeamMemberDto;
 import com.Task_Management_System.TMS.dto.TeamResponseDto;
+import com.Task_Management_System.TMS.exception.BadRequestException;
+import com.Task_Management_System.TMS.model.Role;
+import com.Task_Management_System.TMS.model.User;
+import com.Task_Management_System.TMS.repository.TeamMemberRepository;
+import com.Task_Management_System.TMS.security.CurrentUserProvider;
 import com.Task_Management_System.TMS.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.Task_Management_System.TMS.exception.BadRequestException;
-import com.Task_Management_System.TMS.model.User;
-import com.Task_Management_System.TMS.repository.UserRepository;
-import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,12 +25,13 @@ import java.util.UUID;
 public class TeamController {
 
     private final TeamService teamService;
-    private final UserRepository userRepository;
-    private final com.Task_Management_System.TMS.repository.TeamMemberRepository teamMemberRepository;
+    private final TeamMemberRepository teamMemberRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     @PostMapping
     public ResponseEntity<TeamResponseDto> createTeam(@Valid @RequestBody TeamDto teamDto) {
-        TeamResponseDto createdTeam = teamService.createTeam(teamDto);
+        // The owner is whoever is logged in, never an ID taken from the request body
+        TeamResponseDto createdTeam = teamService.createTeam(teamDto, currentUserProvider.getCurrentUser());
         return new ResponseEntity<>(createdTeam, HttpStatus.CREATED);
     }
 
@@ -55,14 +56,13 @@ public class TeamController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTeam(@PathVariable UUID id, Authentication authentication) {
-        User currentUser = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new com.Task_Management_System.TMS.exception.ResourceNotFoundException("Current user not found"));
+    public ResponseEntity<Void> deleteTeam(@PathVariable UUID id) {
+        User currentUser = currentUserProvider.getCurrentUser();
         TeamResponseDto team = teamService.getTeamById(id);
 
         boolean isOwner = (team.getOwnerId() != null && team.getOwnerId().equals(currentUser.getId())) ||
                 teamMemberRepository.findByTeamIdAndUserId(id, currentUser.getId())
-                        .map(m -> m.getRole() == com.Task_Management_System.TMS.model.Role.OWNER)
+                        .map(m -> m.getRole() == Role.OWNER)
                         .orElse(false);
 
         if (!isOwner && !currentUser.isAdmin()) {

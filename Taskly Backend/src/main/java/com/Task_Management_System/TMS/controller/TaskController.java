@@ -4,6 +4,7 @@ import com.Task_Management_System.TMS.dto.TaskDto;
 import com.Task_Management_System.TMS.dto.TaskResponseDto;
 import com.Task_Management_System.TMS.dto.TaskStatusUpdateDto;
 import com.Task_Management_System.TMS.model.TaskStatus;
+import com.Task_Management_System.TMS.security.CurrentUserProvider;
 import com.Task_Management_System.TMS.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,13 @@ import java.util.UUID;
 public class TaskController {
 
     private final TaskService taskService;
+    private final CurrentUserProvider currentUserProvider;
 
     @PostMapping("/api/lists/{listId}/tasks")
     public ResponseEntity<TaskResponseDto> createTask(
             @PathVariable UUID listId,
             @Valid @RequestBody TaskDto taskDto) {
-        TaskResponseDto createdTask = taskService.createTask(listId, taskDto);
+        TaskResponseDto createdTask = taskService.createTask(listId, taskDto, currentUserProvider.getCurrentUser());
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
     }
 

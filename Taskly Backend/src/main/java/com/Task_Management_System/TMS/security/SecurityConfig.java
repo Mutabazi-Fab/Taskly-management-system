@@ -1,6 +1,7 @@
 package com.Task_Management_System.TMS.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,6 +29,20 @@ public class SecurityConfig {
         // BCrypt salts each password and is deliberately slow, so leaked hashes
         // are expensive to brute-force. Strength 12 = 2^12 hashing rounds.
         return new BCryptPasswordEncoder(12);
+    }
+
+    /**
+     * Because JwtAuthenticationFilter is a @Component, Spring Boot would also register it
+     * as a plain servlet filter, outside Spring Security. It would then run twice, and if
+     * the outside copy runs first, Spring Security resets the login it set up and the
+     * inside copy skips itself ("already filtered"). Disabling the extra registration
+     * makes it run only inside the security chain, where addFilterBefore puts it.
+     */
+    @Bean
+    public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterServletRegistration(JwtAuthenticationFilter filter) {
+        FilterRegistrationBean<JwtAuthenticationFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 
     @Bean

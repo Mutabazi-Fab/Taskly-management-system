@@ -496,10 +496,8 @@ export class DashboardComponent implements OnInit {
 
   onCreateTeamSubmit(): void {
     if (!this.newTeamName().trim()) return;
-    const userId = this.currentUser()?.id;
-    if (!userId) return;
 
-    this.teamService.createTeam({ name: this.newTeamName(), ownerId: userId }).subscribe({
+    this.teamService.createTeam({ name: this.newTeamName() }).subscribe({
       next: (team) => {
         this.showCreateTeam.set(false);
         this.newTeamName.set('');
@@ -618,15 +616,13 @@ export class DashboardComponent implements OnInit {
   onCreateTaskSubmit(): void {
     const listId = this.selectedListForNewTask();
     const board = this.selectedBoard();
-    const creatorId = this.currentUser()?.id;
-    if (!listId || !board || !creatorId || !this.newTaskTitle().trim()) return;
+    if (!listId || !board || !this.newTaskTitle().trim()) return;
 
     this.taskService.createTask(listId, {
       title: this.newTaskTitle(),
       description: this.newTaskDesc(),
       priority: this.newTaskPriority(),
       dueDate: this.newTaskDueDate() || new Date().toISOString().split('T')[0],
-      creatorId: creatorId,
       assigneeId: this.newTaskAssigneeId() ? this.newTaskAssigneeId() : null
     }).subscribe({
       next: () => {

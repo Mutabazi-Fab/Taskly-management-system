@@ -33,11 +33,8 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public TeamResponseDto createTeam(TeamDto teamDto) {
-        User owner = userRepository.findById(teamDto.getOwnerId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + teamDto.getOwnerId()));
-
-        if (owner.getAdmin() == null || !owner.getAdmin()) {
+    public TeamResponseDto createTeam(TeamDto teamDto, User owner) {
+        if (!owner.isAdmin()) {
             throw new BadRequestException("Only administrators are allowed to create teams.");
         }
 
@@ -81,10 +78,15 @@ public class TeamServiceImpl implements TeamService {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + id));
 
+        team.setName(teamDto.getName());
+
+        // No ownerId means "just rename": keep the current owner
+        if (teamDto.getOwnerId() == null) {
+            return mapToResponseDto(teamRepository.save(team));
+        }
+
         User owner = userRepository.findById(teamDto.getOwnerId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + teamDto.getOwnerId()));
-
-        team.setName(teamDto.getName());
         team.setOwner(owner);
 
         // Ensure owner is a member of the team and has OWNER role

@@ -3,7 +3,6 @@ package com.Task_Management_System.TMS.dto;
 import com.Task_Management_System.TMS.model.TaskPriority;
 import com.Task_Management_System.TMS.model.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -32,6 +31,6 @@ public class TaskDto {
 
     private UUID assigneeId;
 
-    @NotNull(message = "Creator user ID is required")
-    private UUID creatorId;
+    // No creatorId here on purpose: the creator is always the logged-in user,
+    // taken from their JWT, so clients cannot create tasks in someone else's name.
 }
