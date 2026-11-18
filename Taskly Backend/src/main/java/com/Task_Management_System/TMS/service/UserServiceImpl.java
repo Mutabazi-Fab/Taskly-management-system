@@ -12,6 +12,7 @@ import com.Task_Management_System.TMS.repository.TeamRepository;
 import com.Task_Management_System.TMS.repository.TaskRepository;
 import com.Task_Management_System.TMS.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,7 +66,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDto updateUser(UUID id, UserUpdateDto updateDto) {
+    public UserResponseDto updateUser(UUID id, UserUpdateDto updateDto, User actingUser) {
+        requireSelfOrAdmin(id, actingUser, "edit");
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
@@ -82,10 +85,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(UUID id) {
+    public void deleteUser(UUID id, User actingUser) {
+        requireSelfOrAdmin(id, actingUser, "delete");
+
+        // Admins can only be removed by another admin, so there is always at least one left
+        if (actingUser.isAdmin() && actingUser.getId().equals(id)) {
+            throw new BadRequestException("Administrators cannot delete their own account. Ask another administrator.");
+        }
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        
+
         if (teamRepository.existsByOwnerId(id)) {
             throw new BadRequestException("Cannot delete user as they own one or more teams. Transfer team ownership first.");
         }
@@ -101,12 +111,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDto toggleAdminStatus(UUID id) {
+    public UserResponseDto toggleAdminStatus(UUID id, User actingUser) {
+        // SecurityConfig already limits this endpoint to admins; this is a second line of defence
+        if (!actingUser.isAdmin()) {
+            throw new AccessDeniedException("Only administrators can change administrator privileges");
+        }
+        // Stops an admin from locking themselves (and possibly everyone) out of admin tools
+        if (actingUser.getId().equals(id)) {
+            throw new BadRequestException("You cannot change your own administrator privileges");
+        }
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         user.setAdmin(!user.isAdmin());
         User updated = userRepository.save(user);
         return mapToResponseDto(updated);
+    }
+
+    /** Users may manage their own account; administrators may manage anyone's. */
+    private void requireSelfOrAdmin(UUID targetUserId, User actingUser, String action) {
+        if (!actingUser.getId().equals(targetUserId) && !actingUser.isAdmin()) {
+            throw new AccessDeniedException("You can only " + action + " your own account");
+        }
     }
 
     private UserResponseDto mapToResponseDto(User user) {

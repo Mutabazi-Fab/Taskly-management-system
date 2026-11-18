@@ -3,6 +3,7 @@ package com.Task_Management_System.TMS.controller;
 import com.Task_Management_System.TMS.dto.UserRegistrationDto;
 import com.Task_Management_System.TMS.dto.UserResponseDto;
 import com.Task_Management_System.TMS.dto.UserUpdateDto;
+import com.Task_Management_System.TMS.security.CurrentUserProvider;
 import com.Task_Management_System.TMS.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final CurrentUserProvider currentUserProvider;
 
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserRegistrationDto registrationDto) {
@@ -42,19 +44,19 @@ public class UserController {
     public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable UUID id,
             @Valid @RequestBody UserUpdateDto updateDto) {
-        UserResponseDto updatedUser = userService.updateUser(id, updateDto);
+        UserResponseDto updatedUser = userService.updateUser(id, updateDto, currentUserProvider.getCurrentUser());
         return ResponseEntity.ok(updatedUser);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        userService.deleteUser(id);
+        userService.deleteUser(id, currentUserProvider.getCurrentUser());
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/admin")
     public ResponseEntity<UserResponseDto> toggleAdminStatus(@PathVariable UUID id) {
-        UserResponseDto updated = userService.toggleAdminStatus(id);
+        UserResponseDto updated = userService.toggleAdminStatus(id, currentUserProvider.getCurrentUser());
         return ResponseEntity.ok(updated);
     }
 }
