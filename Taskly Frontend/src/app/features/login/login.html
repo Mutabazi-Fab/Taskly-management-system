@@ -129,6 +129,9 @@
         <p class="subtitle">Securely log in to manage your workspaces</p>
       </div>
 
+      @if (infoMessage() && !isSignupMode()) {
+        <div class="info-banner" role="status">{{ infoMessage() }}</div>
+      }
       @if (errorMessage() && !isSignupMode()) {
         <div class="error-banner">{{ errorMessage() }}</div>
       }

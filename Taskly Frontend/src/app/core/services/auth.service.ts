@@ -20,10 +20,10 @@ export class AuthService {
     currentUser = signal<User | null>(null);
 
     constructor() {
-        // Re-hydrate user state if a token and cached user info exist in the browser
-        const token = localStorage.getItem('authToken');
+        // Re-hydrate user state only if the stored token is still valid.
+        // An expired token is left for authGuard, which clears it and tells the user why.
         const cachedUser = localStorage.getItem('currentUser');
-        if (token && cachedUser) {
+        if (this.isTokenValid() && cachedUser) {
             this.currentUser.set(JSON.parse(cachedUser));
         }
     }
@@ -69,14 +69,47 @@ export class AuthService {
 
     // Log the user out
     logout(): void {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('currentUser');
-        this.currentUser.set(null);
+        this.clearSession();
         this.router.navigate(['/login']);
     }
 
-    // Quick helper to check authentication status
+    /**
+     * Called when the server rejects our token (HTTP 401): it expired, or the backend
+     * restarted with a different JWT secret. Several requests can fail at once, so
+     * only the first call does anything.
+     */
+    endExpiredSession(): void {
+        if (!localStorage.getItem('authToken')) {
+            return;
+        }
+        this.clearSession();
+        this.router.navigate(['/login'], { queryParams: { reason: 'expired' } });
+    }
+
+    // True if a token is stored and its expiry time ("exp" claim) has not passed yet
     isAuthenticated(): boolean {
-        return !!localStorage.getItem('authToken');
+        return this.isTokenValid();
+    }
+
+    isTokenValid(token: string | null = localStorage.getItem('authToken')): boolean {
+        if (!token) {
+            return false;
+        }
+        try {
+            // A JWT is header.payload.signature; the payload is base64url-encoded JSON.
+            // Reading "exp" here is only a convenience check: the server still verifies
+            // the signature on every request.
+            const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            const { exp } = JSON.parse(atob(payload));
+            return typeof exp === 'number' && exp * 1000 > Date.now();
+        } catch {
+            return false; // Malformed token
+        }
+    }
+
+    clearSession(): void {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        this.currentUser.set(null);
     }
 }

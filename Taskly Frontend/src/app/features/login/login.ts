@@ -30,6 +30,7 @@ export class LoginComponent implements OnInit {
   // State
   errorMessage = signal('');
   successMessage = signal('');
+  infoMessage = signal('');
   isLoading = signal(false);
 
   // Password Strength Evaluation
@@ -64,6 +65,11 @@ export class LoginComponent implements OnInit {
       this.isSignupMode.set(true);
     }
 
+    // Set by the JWT interceptor / auth guard when the session timed out
+    if (this.route.snapshot.queryParams['reason'] === 'expired') {
+      this.infoMessage.set('Your session has expired. Please log in again.');
+    }
+
     // Rehydrate remembered email
     const savedEmail = localStorage.getItem('taskly_remembered_email');
     if (savedEmail) {
@@ -80,6 +86,7 @@ export class LoginComponent implements OnInit {
 
     this.isLoading.set(true);
     this.errorMessage.set('');
+    this.infoMessage.set('');
 
     this.authService.login({ email: this.email(), password: this.password() }).subscribe({
       next: () => {
