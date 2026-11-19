@@ -76,7 +76,7 @@ public class TeamController {
     public ResponseEntity<TeamMemberDto> addMember(
             @PathVariable UUID id,
             @Valid @RequestBody AddMemberDto addMemberDto) {
-        TeamMemberDto member = teamService.addMember(id, addMemberDto);
+        TeamMemberDto member = teamService.addMember(id, addMemberDto, currentUserProvider.getCurrentUser());
         return new ResponseEntity<>(member, HttpStatus.CREATED);
     }
 
@@ -84,7 +84,7 @@ public class TeamController {
     public ResponseEntity<Void> removeMember(
             @PathVariable UUID id,
             @PathVariable UUID userId) {
-        teamService.removeMember(id, userId);
+        teamService.removeMember(id, userId, currentUserProvider.getCurrentUser());
         return ResponseEntity.noContent().build();
     }
 

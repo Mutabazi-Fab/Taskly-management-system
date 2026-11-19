@@ -15,7 +15,8 @@ public interface TeamService {
     TeamResponseDto getTeamById(UUID id);
     TeamResponseDto updateTeam(UUID id, TeamDto teamDto);
     void deleteTeam(UUID id);
-    TeamMemberDto addMember(UUID teamId, AddMemberDto addMemberDto);
-    void removeMember(UUID teamId, UUID userId);
+    // actingUser = the logged-in user making the request, used for permission checks
+    TeamMemberDto addMember(UUID teamId, AddMemberDto addMemberDto, User actingUser);
+    void removeMember(UUID teamId, UUID userId, User actingUser);
     List<TeamMemberDto> getTeamMembers(UUID teamId);
 }

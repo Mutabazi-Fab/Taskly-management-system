@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -98,6 +99,30 @@ class RequestIdentityTest {
                 .andExpect(status().isCreated());
 
         verify(taskService).createTask(eq(listId), any(TaskDto.class), eq(loggedInUser));
+    }
+
+    @Test
+    void addMemberAcceptsTheEmailTheFrontendFormSendsAndChecksTheLoggedInUser() throws Exception {
+        UUID teamId = UUID.randomUUID();
+
+        // Exactly the JSON the "Add Team Member" modal sends
+        mockMvc.perform(post("/api/teams/" + teamId + "/members")
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\": \"bob@example.com\", \"role\": \"MEMBER\"}"))
+                .andExpect(status().isCreated());
+
+        verify(teamService).addMember(eq(teamId),
+                argThat(dto -> "bob@example.com".equals(dto.getEmail())), eq(loggedInUser));
+    }
+
+    @Test
+    void addMemberWithoutEmailIsRejectedWith400() throws Exception {
+        mockMvc.perform(post("/api/teams/" + UUID.randomUUID() + "/members")
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"role\": \"MEMBER\"}"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

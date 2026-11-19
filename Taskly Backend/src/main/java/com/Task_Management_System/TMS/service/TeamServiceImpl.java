@@ -10,6 +10,7 @@ import com.Task_Management_System.TMS.exception.ResourceNotFoundException;
 import com.Task_Management_System.TMS.model.*;
 import com.Task_Management_System.TMS.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -163,14 +164,19 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public TeamMemberDto addMember(UUID teamId, AddMemberDto addMemberDto) {
+    public TeamMemberDto addMember(UUID teamId, AddMemberDto addMemberDto, User actingUser) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
 
-        User user = userRepository.findById(addMemberDto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + addMemberDto.getUserId()));
+        if (!isOwnerOrAdmin(team, actingUser)) {
+            throw new AccessDeniedException("Only the team owner or an administrator can add members");
+        }
 
-        if (teamMemberRepository.existsByTeamIdAndUserId(teamId, addMemberDto.getUserId())) {
+        String email = addMemberDto.getEmail().trim();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("No user found with email: " + email));
+
+        if (teamMemberRepository.existsByTeamIdAndUserId(teamId, user.getId())) {
             throw new ConflictException("User is already a member of this team");
         }
 
@@ -186,9 +192,15 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public void removeMember(UUID teamId, UUID userId) {
+    public void removeMember(UUID teamId, UUID userId, User actingUser) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
+
+        // Owners and admins can remove anyone; everyone else can only remove themselves (leave)
+        boolean leavingThemselves = actingUser.getId().equals(userId);
+        if (!leavingThemselves && !isOwnerOrAdmin(team, actingUser)) {
+            throw new AccessDeniedException("Only the team owner or an administrator can remove other members");
+        }
 
         TeamMember membership = teamMemberRepository.findByTeamIdAndUserId(teamId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Membership not found for user: " + userId + " in team: " + teamId));
@@ -204,6 +216,16 @@ public class TeamServiceImpl implements TeamService {
         }
 
         teamMemberRepository.delete(membership);
+    }
+
+    /** True if the user is a system admin, the team's owner, or has the OWNER role in the team. */
+    private boolean isOwnerOrAdmin(Team team, User user) {
+        if (user.isAdmin() || team.getOwner().getId().equals(user.getId())) {
+            return true;
+        }
+        return teamMemberRepository.findByTeamIdAndUserId(team.getId(), user.getId())
+                .map(member -> member.getRole() == Role.OWNER)
+                .orElse(false);
     }
 
     @Override

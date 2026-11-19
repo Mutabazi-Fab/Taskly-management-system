@@ -518,8 +518,9 @@ export class DashboardComponent implements OnInit {
         this.showAddMember.set(false);
         this.newMemberEmail.set('');
         this.selectTeam(team);
+        this.showToast('Member added to the team.', 'success');
       },
-      error: (err) => alert(err.error?.message || 'Failed to add member.')
+      error: (err) => this.showToast(err.error?.message || 'Failed to add member.', 'danger')
     });
   }
 
