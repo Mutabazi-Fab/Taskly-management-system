@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Task, Attachment } from '../models/task.model';
+import { Task, Attachment, TaskStatus } from '../models/task.model';
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +32,11 @@ export class TaskService {
 
   updateTaskStatus(taskId: string, status: string): Observable<Task> {
     return this.http.patch<Task>(`${this.apiBaseUrl}/tasks/${taskId}/status`, { status });
+  }
+
+  // Moves a task to another column and updates its status in a single request
+  moveTask(taskId: string, listId: string, status: TaskStatus): Observable<Task> {
+    return this.http.patch<Task>(`${this.apiBaseUrl}/tasks/${taskId}/move`, { listId, status });
   }
 
   deleteTask(taskId: string): Observable<void> {

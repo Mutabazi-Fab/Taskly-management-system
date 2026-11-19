@@ -1,7 +1,9 @@
 package com.Task_Management_System.TMS.service;
 
 import com.Task_Management_System.TMS.dto.TaskDto;
+import com.Task_Management_System.TMS.dto.TaskMoveDto;
 import com.Task_Management_System.TMS.dto.TaskResponseDto;
+import com.Task_Management_System.TMS.exception.BadRequestException;
 import com.Task_Management_System.TMS.exception.ResourceNotFoundException;
 import com.Task_Management_System.TMS.model.*;
 import com.Task_Management_System.TMS.repository.TaskListRepository;
@@ -109,6 +111,32 @@ public class TaskServiceImpl implements TaskService {
         task.setStatus(status);
         Task updatedTask = taskRepository.save(task);
         return mapToResponseDto(updatedTask);
+    }
+
+    @Override
+    @Transactional
+    public TaskResponseDto moveTask(UUID id, TaskMoveDto moveDto) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
+
+        TaskList targetList = taskListRepository.findById(moveDto.getListId())
+                .orElseThrow(() -> new ResourceNotFoundException("TaskList not found with id: " + moveDto.getListId()));
+
+        // Tasks can move between columns of their own board, but not into another
+        // board (which could belong to a different team).
+        UUID currentBoardId = task.getTaskList().getBoard().getId();
+        if (!targetList.getBoard().getId().equals(currentBoardId)) {
+            throw new BadRequestException("A task can only be moved to a column on the same board");
+        }
+
+        // List and status change together in one transaction, so a task can never
+        // end up in the "Done" column while still marked as in progress.
+        task.setTaskList(targetList);
+        if (moveDto.getStatus() != null) {
+            task.setStatus(moveDto.getStatus());
+        }
+
+        return mapToResponseDto(taskRepository.save(task));
     }
 
     @Override

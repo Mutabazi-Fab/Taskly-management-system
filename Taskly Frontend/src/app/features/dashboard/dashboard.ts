@@ -676,17 +676,8 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    const lists = this.lists();
-    const targetList = lists.find(l => l.id === targetListId);
-    let nextStatus: TaskStatus = 'TODO';
-    if (targetList) {
-      const nameLower = targetList.name.toLowerCase();
-      if (nameLower.includes('done') || nameLower.includes('complete')) {
-        nextStatus = 'DONE';
-      } else if (nameLower.includes('progress') || nameLower.includes('doing')) {
-        nextStatus = 'IN_PROGRESS';
-      }
-    }
+    const targetList = this.lists().find(l => l.id === targetListId);
+    const nextStatus = this.statusForList(targetList);
 
     // Optimistically update local view for instant snappy feedback
     const currentMap = { ...this.tasksMap() };
@@ -697,30 +688,42 @@ export class DashboardComponent implements OnInit {
     currentMap[targetListId] = newListTasks;
     this.tasksMap.set(currentMap);
 
-    this.taskService.updateTask(task.id, { listId: targetListId }).subscribe({
+    this.draggedTask.set(null);
+    this.sendMoveRequest(task, targetListId, nextStatus, targetList?.name);
+  }
+
+  // The status a task gets when placed in a column, guessed from the column's name
+  private statusForList(list: TaskList | undefined): TaskStatus {
+    const nameLower = list?.name.toLowerCase() ?? '';
+    if (nameLower.includes('done') || nameLower.includes('complete')) {
+      return 'DONE';
+    }
+    if (nameLower.includes('progress') || nameLower.includes('doing')) {
+      return 'IN_PROGRESS';
+    }
+    return 'TODO';
+  }
+
+  // Saves a move on the server, then reloads the board. If it fails, the reload
+  // also puts an optimistically moved card back where it really is.
+  private sendMoveRequest(task: Task, targetListId: string, status: TaskStatus, targetListName?: string): void {
+    const reloadBoard = () => {
+      const board = this.selectedBoard();
+      if (board) this.loadBoardData(board.id);
+    };
+
+    this.taskService.moveTask(task.id, targetListId, status).subscribe({
       next: () => {
-        this.taskService.updateTaskStatus(task.id, nextStatus).subscribe({
-          next: () => {
-            const board = this.selectedBoard();
-            if (board) this.loadBoardData(board.id);
-            this.loadAllTasks();
-            this.showToast(`Task moved to ${targetList?.name || 'new column'}.`, 'success');
-          },
-          error: () => {
-            const board = this.selectedBoard();
-            if (board) this.loadBoardData(board.id);
-            this.showToast('Failed to update task status.', 'danger');
-          }
-        });
+        reloadBoard();
+        this.loadAllTasks();
+        this.loadMyTasks();
+        this.showToast(`Task moved to ${targetListName || 'new column'}.`, 'success');
       },
-      error: () => {
-        const board = this.selectedBoard();
-        if (board) this.loadBoardData(board.id);
-        this.showToast('Failed to move task.', 'danger');
+      error: (err) => {
+        reloadBoard();
+        this.showToast(err.error?.message || 'Failed to move task.', 'danger');
       }
     });
-
-    this.draggedTask.set(null);
   }
 
   // --- Task Details Drawer / Modal ---
@@ -791,27 +794,7 @@ export class DashboardComponent implements OnInit {
     if (targetListIndex < 0 || targetListIndex >= lists.length) return;
 
     const targetList = lists[targetListIndex];
-    // Find target status mapping based on target list name (fallback to TODO/IN_PROGRESS/DONE)
-    let nextStatus: TaskStatus = 'TODO';
-    const nameLower = targetList.name.toLowerCase();
-    if (nameLower.includes('done') || nameLower.includes('complete')) {
-      nextStatus = 'DONE';
-    } else if (nameLower.includes('progress') || nameLower.includes('doing')) {
-      nextStatus = 'IN_PROGRESS';
-    }
-
-    // Call update task (move task list ID & PATCH status)
-    this.taskService.updateTask(task.id, { listId: targetList.id }).subscribe({
-      next: () => {
-        this.taskService.updateTaskStatus(task.id, nextStatus).subscribe({
-          next: () => {
-            const board = this.selectedBoard();
-            if (board) this.loadBoardData(board.id);
-            this.loadAllTasks();
-          }
-        });
-      }
-    });
+    this.sendMoveRequest(task, targetList.id, this.statusForList(targetList), targetList.name);
   }
 
   deleteTask(task: Task): void {

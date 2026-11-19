@@ -1,6 +1,7 @@
 package com.Task_Management_System.TMS.controller;
 
 import com.Task_Management_System.TMS.dto.TaskDto;
+import com.Task_Management_System.TMS.dto.TaskMoveDto;
 import com.Task_Management_System.TMS.dto.TaskResponseDto;
 import com.Task_Management_System.TMS.dto.TaskStatusUpdateDto;
 import com.Task_Management_System.TMS.model.TaskStatus;
@@ -56,6 +57,14 @@ public class TaskController {
             @Valid @RequestBody TaskStatusUpdateDto statusUpdateDto) {
         TaskResponseDto updatedTask = taskService.updateTaskStatus(id, statusUpdateDto.getStatus());
         return ResponseEntity.ok(updatedTask);
+    }
+
+    @PatchMapping("/api/tasks/{id}/move")
+    public ResponseEntity<TaskResponseDto> moveTask(
+            @PathVariable UUID id,
+            @Valid @RequestBody TaskMoveDto moveDto) {
+        TaskResponseDto movedTask = taskService.moveTask(id, moveDto);
+        return ResponseEntity.ok(movedTask);
     }
 
     @DeleteMapping("/api/tasks/{id}")
