@@ -12,4 +12,7 @@ public interface JoinRequestRepository extends JpaRepository<JoinRequest, UUID> 
     List<JoinRequest> findByTeamId(UUID teamId);
 
     boolean existsByTeamIdAndRequesterIdAndStatus(UUID teamId, UUID requesterId, String status);
+
+    // Every request the user sent, or that was sent to them as the deciding admin
+    List<JoinRequest> findByRequesterIdOrAdminId(UUID requesterId, UUID adminId);
 }

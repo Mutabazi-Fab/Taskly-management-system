@@ -5,8 +5,12 @@ import com.Task_Management_System.TMS.dto.UserResponseDto;
 import com.Task_Management_System.TMS.dto.UserUpdateDto;
 import com.Task_Management_System.TMS.exception.ConflictException;
 import com.Task_Management_System.TMS.exception.ResourceNotFoundException;
+import com.Task_Management_System.TMS.model.JoinRequest;
+import com.Task_Management_System.TMS.model.Task;
 import com.Task_Management_System.TMS.model.User;
 import com.Task_Management_System.TMS.exception.BadRequestException;
+import com.Task_Management_System.TMS.repository.JoinRequestRepository;
+import com.Task_Management_System.TMS.repository.NotificationRepository;
 import com.Task_Management_System.TMS.repository.TeamMemberRepository;
 import com.Task_Management_System.TMS.repository.TeamRepository;
 import com.Task_Management_System.TMS.repository.TaskRepository;
@@ -29,6 +33,8 @@ public class UserServiceImpl implements UserService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TaskRepository taskRepository;
+    private final JoinRequestRepository joinRequestRepository;
+    private final NotificationRepository notificationRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -100,12 +106,37 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("Cannot delete user as they own one or more teams. Transfer team ownership first.");
         }
 
-        // Remove team memberships first
+        // Every table with a required link to this user must be cleaned up first,
+        // or the database's foreign keys reject the delete.
+
+        // 1. Team memberships
         teamMemberRepository.deleteByUserId(id);
-        
-        // Unassign all tasks assigned to the user
-        taskRepository.unassignTasksByUserId(id);
-        
+
+        // 2. Tasks assigned to the user become unassigned. This goes through the task
+        //    entities (not a bulk SQL UPDATE), so tasks Hibernate already has in memory
+        //    are updated too and can't be flushed back still pointing at the deleted user.
+        for (Task task : taskRepository.findByAssigneeId(id)) {
+            task.setAssignee(null);
+        }
+
+        // 3. Tasks the user created are kept (the team still needs them) and handed to the
+        //    owner of the team they belong to. A team always has an owner, and owners can't
+        //    be deleted (checked above), so the new creator always exists.
+        for (Task task : taskRepository.findByCreatorId(id)) {
+            task.setCreator(task.getTaskList().getBoard().getTeam().getOwner());
+        }
+
+        // 4. Join requests the user sent, or that were sent to them as the deciding admin,
+        //    plus the notifications that point at those requests
+        List<JoinRequest> joinRequests = joinRequestRepository.findByRequesterIdOrAdminId(id, id);
+        if (!joinRequests.isEmpty()) {
+            notificationRepository.deleteByRequestIdIn(joinRequests.stream().map(JoinRequest::getId).toList());
+            joinRequestRepository.deleteAll(joinRequests);
+        }
+
+        // 5. The user's own notifications
+        notificationRepository.deleteByUserId(id);
+
         userRepository.delete(user);
     }
 

@@ -190,9 +190,9 @@ Access the client application at **`http://localhost:4200`**.
 cd "Taskly Backend"
 mvn test
 ```
-`TmsApplicationTests` starts the full application, so it needs PostgreSQL running. To run only the fast tests that need no database:
+Tests tagged `database` (the full application startup test and the user-deletion integration test) run against PostgreSQL, so it needs to be running. The user-deletion test rolls back its data when it finishes. To run only the fast tests that need no database:
 ```bash
-mvn test -Dtest='!TmsApplicationTests' -Dsurefire.failIfNoSpecifiedTests=false
+mvn test -DexcludedGroups=database
 ```
 
 **Frontend** (Vitest via the Angular CLI):

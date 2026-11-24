@@ -3,6 +3,8 @@ package com.Task_Management_System.TMS.service;
 import com.Task_Management_System.TMS.dto.UserUpdateDto;
 import com.Task_Management_System.TMS.exception.BadRequestException;
 import com.Task_Management_System.TMS.model.User;
+import com.Task_Management_System.TMS.repository.JoinRequestRepository;
+import com.Task_Management_System.TMS.repository.NotificationRepository;
 import com.Task_Management_System.TMS.repository.TaskRepository;
 import com.Task_Management_System.TMS.repository.TeamMemberRepository;
 import com.Task_Management_System.TMS.repository.TeamRepository;
@@ -34,6 +36,8 @@ class UserServiceImplTest {
     @Mock private TeamRepository teamRepository;
     @Mock private TeamMemberRepository teamMemberRepository;
     @Mock private TaskRepository taskRepository;
+    @Mock private JoinRequestRepository joinRequestRepository;
+    @Mock private NotificationRepository notificationRepository;
     @Mock private PasswordEncoder passwordEncoder;
 
     @InjectMocks
