@@ -1,5 +1,6 @@
 # Taskly - Collaborative Task & Workspace Management System
 
+[![CI](https://github.com/Mutabazi-Fab/Taskly-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/Mutabazi-Fab/Taskly-management-system/actions/workflows/ci.yml)
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.x-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)](https://angular.dev/)
@@ -179,6 +180,31 @@ npm install
 npx ng serve
 ```
 Access the client application at **`http://localhost:4200`**.
+
+---
+
+## Running the Tests
+
+**Backend** (JUnit 5, Mockito, Spring MockMvc):
+```bash
+cd "Taskly Backend"
+mvn test
+```
+`TmsApplicationTests` starts the full application, so it needs PostgreSQL running. To run only the fast tests that need no database:
+```bash
+mvn test -Dtest='!TmsApplicationTests' -Dsurefire.failIfNoSpecifiedTests=false
+```
+
+**Frontend** (Vitest via the Angular CLI):
+```bash
+cd "Taskly Frontend"
+npx ng test --watch=false
+```
+
+### Continuous Integration
+Every push and pull request to `main` runs [GitHub Actions](.github/workflows/ci.yml) with two parallel jobs:
+* **Backend:** `mvn verify` on JDK 21 against a throwaway PostgreSQL 16 container.
+* **Frontend:** `npm ci`, the unit tests, and a production build on Node.js 24.
 
 ---
 
