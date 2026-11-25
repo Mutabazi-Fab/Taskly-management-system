@@ -1506,14 +1506,6 @@
     </div>
   }
 
-  <!-- Dynamic Toast System -->
-  <div class="toast-container">
-    @for (toast of toasts(); track toast.id) {
-      <div class="toast-card" [class]="toast.type">
-        <span class="toast-message">{{ toast.message }}</span>
-        <button class="btn-toast-close" (click)="toasts.update(list => list.filter(t => t.id !== toast.id))">×</button>
-      </div>
-    }
-  </div>
+  <!-- Toasts are rendered app-wide by <app-toast-container> in app.html -->
 
 </div>

@@ -7,6 +7,7 @@ import { TeamService } from '../../core/services/team.service';
 import { BoardService } from '../../core/services/board.service';
 import { TaskService } from '../../core/services/task.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ToastService, ToastType } from '../../core/services/toast.service';
 import { Team, TeamMember } from '../../core/models/team.model';
 import { Board, TaskList, BoardStats } from '../../core/models/board.model';
 import { Task, TaskPriority, TaskStatus } from '../../core/models/task.model';
@@ -104,15 +105,11 @@ export class DashboardComponent implements OnInit {
   editTaskAssigneeId = signal<string>('');
   editTaskStatus = signal<TaskStatus>('TODO');
 
-  // Toast System
-  toasts = signal<{ id: string; message: string; type: 'success' | 'danger' | 'info' }[]>([]);
+  // Toasts are shown app-wide by ToastService (rendered in the app shell)
+  private toastService = inject(ToastService);
 
-  showToast(message: string, type: 'success' | 'danger' | 'info' = 'success'): void {
-    const id = Math.random().toString(36).substring(2, 9);
-    this.toasts.update(list => [...list, { id, message, type }]);
-    setTimeout(() => {
-      this.toasts.update(list => list.filter(t => t.id !== id));
-    }, 4000);
+  showToast(message: string, type: ToastType = 'success'): void {
+    this.toastService.show(message, type);
   }
 
   // Custom Confirmation Modal System

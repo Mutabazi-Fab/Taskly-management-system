@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 import { User } from '../../core/models/user.model';
 
 @Component({
@@ -15,6 +16,7 @@ import { User } from '../../core/models/user.model';
 export class AdminComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private toast = inject(ToastService);
 
   users = signal<User[]>([]);
   isLoading = signal(false);
@@ -68,13 +70,18 @@ export class AdminComponent implements OnInit {
 
   toggleAdmin(user: User): void {
     if (user.id === this.authService.currentUser()?.id) {
-      alert('You cannot revoke your own admin rights!');
+      this.toast.error('You cannot revoke your own admin rights.');
       return;
     }
 
     this.authService.toggleAdmin(user.id).subscribe({
-      next: () => this.loadUsers(),
-      error: (err) => alert(err.error?.message || 'Failed to toggle privileges.')
+      next: (updated) => {
+        this.loadUsers();
+        this.toast.success(updated.admin
+          ? `${user.username} is now an administrator.`
+          : `${user.username} is no longer an administrator.`);
+      },
+      error: (err) => this.toast.error(err.error?.message || 'Failed to toggle privileges.')
     });
   }
 
@@ -100,14 +107,17 @@ export class AdminComponent implements OnInit {
 
   deleteUser(user: User): void {
     if (user.id === this.authService.currentUser()?.id) {
-      alert('You cannot delete your own account!');
+      this.toast.error('You cannot delete your own account.');
       return;
     }
 
     this.triggerConfirm(`Are you sure you want to delete user ${user.username}? This cannot be undone.`, () => {
       this.authService.deleteUser(user.id).subscribe({
-        next: () => this.loadUsers(),
-        error: (err) => alert(err.error?.message || 'Failed to delete user. Make sure they do not own any active teams.')
+        next: () => {
+          this.loadUsers();
+          this.toast.success(`${user.username} was deleted.`);
+        },
+        error: (err) => this.toast.error(err.error?.message || 'Failed to delete user. Make sure they do not own any active teams.')
       });
     });
   }

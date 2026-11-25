@@ -1,0 +1,84 @@
+/* Toast Notification Styles (moved from dashboard.css so every page can use them) */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast-card {
+  pointer-events: auto;
+  padding: 14px 20px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  background: #FFFFFF;
+  border-left: 5px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 320px;
+  max-width: 420px;
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast-card.success {
+  border-left-color: var(--color-success);
+}
+
+.toast-card.danger {
+  border-left-color: var(--color-danger);
+}
+
+.toast-card.info {
+  border-left-color: var(--color-primary);
+}
+
+.toast-message {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  line-height: 1.4;
+}
+
+.btn-toast-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.btn-toast-close:hover {
+  opacity: 1;
+}
+
+/* On phones, stretch across the screen instead of overflowing it */
+@media (max-width: 480px) {
+  .toast-container {
+    left: 16px;
+    right: 16px;
+  }
+
+  .toast-card {
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(120%) translateY(0);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+  }
+}
