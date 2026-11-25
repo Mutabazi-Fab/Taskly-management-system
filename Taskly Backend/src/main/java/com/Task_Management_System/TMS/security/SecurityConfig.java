@@ -69,7 +69,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").permitAll() // register is open
                 .requestMatchers(HttpMethod.PATCH, "/api/users/*/admin").hasRole("ADMIN") // admin-only
-                .anyRequest().authenticated()
+                .requestMatchers("/api/**").authenticated()
+                // Everything else is the bundled Angular client (index.html, JS, CSS, images).
+                // It must load before login; the API above still protects all the data.
+                .anyRequest().permitAll()
             );
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
