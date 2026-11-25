@@ -86,3 +86,13 @@ jobs:
 
       - name: Production build
         run: npx ng build
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the image
+        run: docker build -t taskly:ci .

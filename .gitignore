@@ -15,3 +15,6 @@ Taskly Backend/.project
 .DS_Store
 Thumbs.db
 Taskly Backend/Taskly_Backend_Requirements.docx
+
+# Local secrets for docker compose
+.env

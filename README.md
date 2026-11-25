@@ -83,6 +83,7 @@ graph TD
 * **Validation:** Jakarta Validation API
 * **Database Driver & ORM:** PostgreSQL Driver with Hibernate
 * **Build Tool:** Apache Maven
+* **Containers:** Docker multi-stage build + Docker Compose (app + PostgreSQL 16)
 
 ### Frontend
 * **Framework:** Angular 21 (Standalone Components, Signals API)
@@ -97,6 +98,9 @@ graph TD
 
 ```text
 TMS/
+├── Dockerfile                      # Builds frontend + backend into one runnable image
+├── docker-compose.yml              # Starts the app and PostgreSQL with one command
+├── .env.example                    # Optional settings for docker compose (copy to .env)
 ├── Taskly Backend/                 # Spring Boot REST API
 │   ├── src/main/java/com/Task_Management_System/TMS/
 │   │   ├── config/                 # SPA redirection and routing configuration
@@ -122,9 +126,25 @@ TMS/
 
 ---
 
+## Quick Start with Docker
+
+The fastest way to run Taskly. You only need [Docker Desktop](https://www.docker.com/products/docker-desktop/); Java, Node.js and PostgreSQL are not required.
+
+```bash
+docker compose up --build
+```
+
+Then open **`http://localhost:8080`** and create an account. The first build takes a few minutes; later starts are quick.
+
+* The Angular client is compiled inside the image and served by Spring Boot, so it is always the latest code.
+* Data is kept in the `taskly-db` volume and survives restarts. `docker compose down` stops everything; `docker compose down -v` also deletes the data.
+* To keep users logged in across restarts, copy `.env.example` to `.env` and set `JWT_SECRET`. Compose reads `.env` automatically, and git ignores it.
+
+---
+
 ## Prerequisites
 
-Before setting up Taskly locally, make sure you have:
+To run Taskly without Docker, make sure you have:
 * **JDK 21** installed and configured in your `PATH`
 * **Node.js** (v18.x or v20.x+) & **npm**
 * **Maven 3.8+** (or use the Maven wrapper if available)
@@ -202,9 +222,10 @@ npx ng test --watch=false
 ```
 
 ### Continuous Integration
-Every push and pull request to `main` runs [GitHub Actions](.github/workflows/ci.yml) with two parallel jobs:
+Every push and pull request to `main` runs [GitHub Actions](.github/workflows/ci.yml) with three parallel jobs:
 * **Backend:** `mvn verify` on JDK 21 against a throwaway PostgreSQL 16 container.
 * **Frontend:** `npm ci`, the unit tests, and a production build on Node.js 24.
+* **Docker:** builds the full image, so a broken `Dockerfile` is caught before anyone tries to run it.
 
 ---
 

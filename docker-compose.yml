@@ -1,0 +1,40 @@
+# Starts Taskly and its PostgreSQL database with one command:
+#   docker compose up --build
+# Then open http://localhost:8080
+# Optional settings (JWT_SECRET, passwords) go in a .env file; see .env.example.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: task_mgt_db
+      POSTGRES_USER: taskly
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-taskly}
+    volumes:
+      - taskly-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskly -d task_mgt_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: task_mgt_db
+      DATABASE_USER: taskly
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-taskly}
+      JWT_SECRET: ${JWT_SECRET:-}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+    ports:
+      - "8080:8080"
+
+volumes:
+  taskly-db:
