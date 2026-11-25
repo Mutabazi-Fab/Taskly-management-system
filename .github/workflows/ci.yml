@@ -57,8 +57,9 @@ jobs:
           cache: maven
           cache-dependency-path: Taskly Backend/pom.xml
 
+      # The frontend job builds and tests Angular; the Docker job checks the full bundled build
       - name: Build and run tests
-        run: mvn -B verify
+        run: mvn -B verify -DskipFrontend=true
 
   frontend:
     name: Frontend (Angular)

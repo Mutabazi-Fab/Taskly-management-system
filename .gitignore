@@ -2,9 +2,13 @@
 Taskly Frontend/node_modules/
 Taskly Frontend/.angular/
 Taskly Frontend/dist/
+# Node.js downloaded by the Maven build
+Taskly Frontend/node/
 
 # Java compilation files
 Taskly Backend/target/
+# The Angular bundle is built into the jar by Maven, never copied into src by hand
+Taskly Backend/src/main/resources/static/
 Taskly Backend/.idea/
 Taskly Backend/*.iml
 Taskly Backend/.settings/

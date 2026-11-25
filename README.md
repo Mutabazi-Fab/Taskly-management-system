@@ -113,7 +113,7 @@ TMS/
 │   │   └── service/                # Business logic contracts and implementations
 │   └── src/main/resources/
 │       ├── application.properties  # Database connection, port binding, and Hibernate configuration
-│       └── static/                 # Production-built Angular bundle for monolithic deployment
+│       └── (static/)               # Not in git: Maven builds the Angular client into the jar
 │
 └── Taskly Frontend/                # Angular Single Page Application
     ├── src/app/
@@ -188,9 +188,9 @@ spring.datasource.password=${DATABASE_PASSWORD:your_password}
 From the repository root:
 ```bash
 cd "Taskly Backend"
-mvn spring-boot:run
+mvn spring-boot:run -DskipFrontend=true
 ```
-The REST API will start on **`http://localhost:8080`**.
+The REST API will start on **`http://localhost:8080`**. `-DskipFrontend=true` skips bundling the Angular client, since in development it is served by `ng serve` (next step).
 
 ### 3. Run the Frontend Client
 In a separate terminal window:
@@ -208,12 +208,13 @@ Access the client application at **`http://localhost:4200`**.
 **Backend** (JUnit 5, Mockito, Spring MockMvc):
 ```bash
 cd "Taskly Backend"
-mvn test
+mvn test -DskipFrontend=true
 ```
 Tests tagged `database` (the full application startup test and the user-deletion integration test) run against PostgreSQL, so it needs to be running. The user-deletion test rolls back its data when it finishes. To run only the fast tests that need no database:
 ```bash
-mvn test -DexcludedGroups=database
+mvn test -DskipFrontend=true -DexcludedGroups=database
 ```
+Without `-DskipFrontend=true`, Maven also builds the Angular client first (see below).
 
 **Frontend** (Vitest via the Angular CLI):
 ```bash
@@ -233,33 +234,20 @@ Every push and pull request to `main` runs [GitHub Actions](.github/workflows/ci
 
 Taskly can be packaged into a single deployable Spring Boot JAR containing the compiled Angular frontend. This eliminates CORS overhead in production and allows single-service hosting on platforms like **Railway**.
 
-### Step 1: Build the Frontend
-```bash
-cd "Taskly Frontend"
-npx ng build --configuration production
-```
-The compiled artifacts will be output to `Taskly Frontend/dist/taskly-frontend/browser`.
-
-### Step 2: Copy Assets to Backend Static Directory
-* **Windows (PowerShell):**
-  ```powershell
-  Remove-Item -Recurse -Force "..\Taskly Backend\src\main\resources\static\*"
-  Copy-Item -Recurse -Force "dist\taskly-frontend\browser\*" "..\Taskly Backend\src\main\resources\static\"
-  ```
-* **macOS / Linux:**
-  ```bash
-  rm -rf "../Taskly Backend/src/main/resources/static/"*
-  cp -r dist/taskly-frontend/browser/* "../Taskly Backend/src/main/resources/static/"
-  ```
-
-### Step 3: Package the Spring Boot Executable JAR
+### Build the JAR
+One command builds both halves:
 ```bash
 cd "Taskly Backend"
 mvn clean package -DskipTests
 ```
-The resulting JAR in `target/TMS-0.0.1-SNAPSHOT.jar` serves both the REST endpoints under `/api/**` and the Angular client for all other web routes via `SpaRedirectConfig`.
+During the build, Maven (via `frontend-maven-plugin`):
+1. Downloads a pinned Node.js into `Taskly Frontend/node/` (first build only; no global Node.js needed).
+2. Runs `npm ci` and the production `ng build` in `Taskly Frontend`.
+3. Copies the result into the JAR's `static/` folder.
 
-### Step 4: Deploying to Cloud Providers (e.g, Railway)
+The compiled bundle is never committed, so the JAR always contains the current frontend code. The resulting JAR in `target/TMS-0.0.1-SNAPSHOT.jar` serves both the REST endpoints under `/api/**` and the Angular client for all other web routes via `SpaRedirectConfig`. Pass `-DskipFrontend=true` for a faster backend-only build.
+
+### Deploying to Cloud Providers (e.g, Railway)
 1. Link your GitHub repository to Railway.
 2. Provide the required environment variables:
    * `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` (or `DATABASE_URL`)
