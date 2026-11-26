@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject, HostListener } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, HostListener, ElementRef, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -9,6 +9,8 @@ import { TaskService } from '../../core/services/task.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ToastService, ToastType } from '../../core/services/toast.service';
 import { CelebrationService, Point } from '../../core/services/celebration.service';
+import { ShortcutAction, ShortcutResolver, isTypingTarget } from '../../core/shortcuts/keyboard-shortcuts';
+import { ShortcutHelpComponent } from '../../shared/shortcut-help/shortcut-help';
 import { Team, TeamMember } from '../../core/models/team.model';
 import { Board, TaskList, BoardStats } from '../../core/models/board.model';
 import { Task, TaskPriority, TaskStatus } from '../../core/models/task.model';
@@ -17,7 +19,7 @@ import { User } from '../../core/models/user.model';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ShortcutHelpComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -144,6 +146,82 @@ export class DashboardComponent implements OnInit {
     this.showConfirmModal.set(false);
     if (action) {
       action();
+    }
+  }
+
+  // --- Keyboard shortcuts (press ? in the app for the full list) ---
+  showShortcutHelp = signal(false);
+  private shortcuts = new ShortcutResolver();
+  private searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
+
+  /** Any dialog that should block shortcuts like N while it's open */
+  private isDialogOpen = computed(() =>
+    this.showCreateTeam() || this.showAddMember() || this.showCreateBoard() || this.showCreateList() ||
+    this.showCreateTask() || this.showJoinRequestModal() || this.showDenialReasonModal() ||
+    this.showConfirmModal() || this.selectedTaskForDetails() !== null
+  );
+
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    const action = this.shortcuts.resolve(event);
+    if (!action) return;
+
+    // While a dialog is open, only Esc and ? do anything
+    if (this.isDialogOpen() && action.type !== 'escape' && action.type !== 'help') return;
+
+    event.preventDefault();
+    this.runShortcut(action, event);
+  }
+
+  private runShortcut(action: ShortcutAction, event: KeyboardEvent): void {
+    switch (action.type) {
+      case 'help':
+        this.showShortcutHelp.update(open => !open);
+        break;
+      case 'goto':
+        this.showShortcutHelp.set(false);
+        this.activeTab.set(action.tab);
+        break;
+      case 'search': {
+        const input = this.searchInput()?.nativeElement;
+        if (input) {
+          input.focus();
+        } else {
+          this.showToast('Pick a team first to search its tasks.', 'info');
+        }
+        break;
+      }
+      case 'newTask': {
+        const firstList = this.lists()[0];
+        if (!this.selectedBoard() || !firstList) {
+          this.showToast('Open a board with at least one column to add a task.', 'info');
+          break;
+        }
+        this.activeTab.set('BOARDS');
+        this.openCreateTaskModal(firstList.id);
+        break;
+      }
+      case 'escape':
+        this.closeTopLayer();
+        if (isTypingTarget(event.target)) (event.target as HTMLElement).blur();
+        break;
+    }
+  }
+
+  /** Esc closes whatever is on top: the shortcut list first, then dialogs, then dropdowns. */
+  private closeTopLayer(): void {
+    if (this.showShortcutHelp()) {
+      this.showShortcutHelp.set(false);
+    } else if (this.showConfirmModal()) {
+      this.showConfirmModal.set(false);
+    } else if (this.selectedTaskForDetails()) {
+      this.closeTaskDetails();
+    } else if (this.isDialogOpen()) {
+      [this.showCreateTeam, this.showAddMember, this.showCreateBoard, this.showCreateList,
+        this.showCreateTask, this.showJoinRequestModal, this.showDenialReasonModal].forEach(open => open.set(false));
+    } else {
+      this.showNotificationsDropdown.set(false);
+      this.showProfileDropdown.set(false);
     }
   }
 

@@ -47,6 +47,7 @@ graph TD
 * **Task Card Management:** Create tasks with rich descriptions, priorities (Low, Medium, High), due dates, and assignees.
 * **Drag-and-Drop Workflow:** Move tasks smoothly between workflow stages.
 * **Completion Celebrations:** Finishing a task (dropping it in Done, ticking it off, or setting it to Done) bursts confetti from where it happened. It's drawn on a temporary canvas with no extra library, and skipped for users who turn on reduced motion in their system settings.
+* **Keyboard Shortcuts:** `N` adds a task, `/` jumps to search, `G` then a letter opens a view (`G D` Dashboard, `G B` Boards, `G C` Calendar...), `Esc` closes windows, and `?` shows the full list. Shortcuts pause while you type.
 * **Quick Filters & Search:** Filter board cards instantly by priority chips (All, High, Medium, Low) or live title/description search.
 * **Batch Column Sweep:** Clear or sweep all completed tasks in a column with one click.
 * **One-Click CSV Export:** Export board task data into standard RFC-4180 CSV format for reporting and spreadsheets.
