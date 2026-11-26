@@ -189,6 +189,14 @@
       <button type="submit" class="btn-primary auth-submit-btn" [disabled]="isLoading()">
         @if (isLoading()) { Logging in... } @else { Sign in }
       </button>
+
+      @if (demoCredentials()) {
+        <div class="demo-divider"><span>or</span></div>
+        <button type="button" class="demo-login-btn" (click)="onDemoLogin()" [disabled]="isLoading()">
+          <span class="demo-login-title">&#9889; Try the live demo</span>
+          <span class="demo-login-hint">No sign-up needed: explore a sample team, board and tasks</span>
+        </button>
+      }
     </form>
   </div>
 

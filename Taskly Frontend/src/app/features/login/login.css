@@ -342,6 +342,63 @@ form {
   cursor: not-allowed;
 }
 
+/* One-click demo login */
+.demo-divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 14px;
+  color: #94A3B8;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.demo-divider::before,
+.demo-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #E2E8F0;
+}
+
+.demo-login-btn {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  background: #EEF1FB;
+  border: 1.5px dashed #A9B4E6;
+  border-radius: 12px;
+  color: #3447AA;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.demo-login-btn:hover:not(:disabled) {
+  background: #E3E8FA;
+  border-style: solid;
+  transform: translateY(-1px);
+}
+
+.demo-login-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.demo-login-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.demo-login-hint {
+  font-size: 0.78rem;
+  color: #64748B;
+}
+
 .error-banner {
   width: 100%;
   background: #FEF2F2;

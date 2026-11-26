@@ -33,6 +33,11 @@ export class AuthService {
         return this.http.post<User>(`${this.apiUrl}/users`, user);
     }
 
+    // Public demo login (404 when the server has the demo turned off)
+    getDemoCredentials(): Observable<{ email: string; password: string }> {
+        return this.http.get<{ email: string; password: string }>(`${this.apiUrl}/auth/demo`);
+    }
+
     // Handles user login
     login(credentials: { email: string; password?: string }): Observable<AuthResponse> {
         return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials).pipe(

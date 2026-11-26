@@ -33,6 +33,9 @@ export class LoginComponent implements OnInit {
   infoMessage = signal('');
   isLoading = signal(false);
 
+  // Public demo login, fetched from the server (null when the demo is turned off)
+  demoCredentials = signal<{ email: string; password: string } | null>(null);
+
   // Password Strength Evaluation
   passwordStrength = computed(() => {
     const pwd = this.password();
@@ -70,6 +73,11 @@ export class LoginComponent implements OnInit {
       this.infoMessage.set('Your session has expired. Please log in again.');
     }
 
+    this.authService.getDemoCredentials().subscribe({
+      next: creds => this.demoCredentials.set(creds),
+      error: () => this.demoCredentials.set(null)
+    });
+
     // Rehydrate remembered email
     const savedEmail = localStorage.getItem('taskly_remembered_email');
     if (savedEmail) {
@@ -101,6 +109,27 @@ export class LoginComponent implements OnInit {
       error: (err) => {
         this.isLoading.set(false);
         this.errorMessage.set(err.error?.message || 'Login failed. Please check your credentials.');
+      }
+    });
+  }
+
+  /** One click into a ready-made workspace, so visitors can explore without signing up. */
+  onDemoLogin(): void {
+    const creds = this.demoCredentials();
+    if (!creds || this.isLoading()) return;
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.infoMessage.set('');
+
+    this.authService.login(creds).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.router.navigate(['/dashboard']);
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.errorMessage.set('The demo is not available right now. Please try again later.');
       }
     });
   }

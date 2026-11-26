@@ -1,5 +1,6 @@
 package com.Task_Management_System.TMS.service;
 
+import com.Task_Management_System.TMS.demo.DemoAccount;
 import com.Task_Management_System.TMS.dto.UserUpdateDto;
 import com.Task_Management_System.TMS.exception.BadRequestException;
 import com.Task_Management_System.TMS.model.User;
@@ -82,6 +83,19 @@ class UserServiceImplTest {
         service.updateUser(bob.getId(), updateFor(bob, "bob-renamed"), admin);
 
         assertEquals("bob-renamed", bob.getUsername());
+    }
+
+    @Test
+    void sharedDemoAccountCannotBeRenamedByVisitors() {
+        User demo = user("demo", false);
+        demo.setEmail(DemoAccount.EMAIL);
+        when(userRepository.findById(demo.getId())).thenReturn(Optional.of(demo));
+
+        assertThrows(BadRequestException.class,
+                () -> service.updateUser(demo.getId(), updateFor(demo, "taken-over"), demo));
+
+        assertEquals("demo", demo.getUsername());
+        verify(userRepository, never()).save(any());
     }
 
     // --- Deleting ---

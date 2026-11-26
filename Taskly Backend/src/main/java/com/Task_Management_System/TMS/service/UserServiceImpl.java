@@ -1,5 +1,6 @@
 package com.Task_Management_System.TMS.service;
 
+import com.Task_Management_System.TMS.demo.DemoAccount;
 import com.Task_Management_System.TMS.dto.UserRegistrationDto;
 import com.Task_Management_System.TMS.dto.UserResponseDto;
 import com.Task_Management_System.TMS.dto.UserUpdateDto;
@@ -77,6 +78,7 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        requireNotSharedDemo(user, actingUser);
 
         if (!user.getEmail().equalsIgnoreCase(updateDto.getEmail()) && userRepository.existsByEmail(updateDto.getEmail())) {
             throw new ConflictException("User with email " + updateDto.getEmail() + " already exists");
@@ -101,6 +103,7 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        requireNotSharedDemo(user, actingUser);
 
         if (teamRepository.existsByOwnerId(id)) {
             throw new BadRequestException("Cannot delete user as they own one or more teams. Transfer team ownership first.");
@@ -163,6 +166,13 @@ public class UserServiceImpl implements UserService {
     private void requireSelfOrAdmin(UUID targetUserId, User actingUser, String action) {
         if (!actingUser.getId().equals(targetUserId) && !actingUser.isAdmin()) {
             throw new AccessDeniedException("You can only " + action + " your own account");
+        }
+    }
+
+    /** Everyone shares the demo login, so visitors must not rename it or change its email. */
+    private void requireNotSharedDemo(User target, User actingUser) {
+        if (DemoAccount.isDemo(target.getEmail()) && !actingUser.isAdmin()) {
+            throw new BadRequestException("The demo account is shared by every visitor, so it can't be changed or deleted.");
         }
     }
 

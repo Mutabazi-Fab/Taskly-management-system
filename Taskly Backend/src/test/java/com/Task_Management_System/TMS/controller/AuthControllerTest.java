@@ -92,4 +92,12 @@ class AuthControllerTest {
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void demoCredentialsArePublic() throws Exception {
+        mockMvc.perform(get("/api/auth/demo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("demo@taskly.dev"))
+                .andExpect(jsonPath("$.password").value("demo1234"));
+    }
 }

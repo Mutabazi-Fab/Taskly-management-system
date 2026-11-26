@@ -37,6 +37,11 @@ graph TD
 
 ## Key Features
 
+### 0. One-Click Live Demo
+* **Try the live demo** on the login page logs visitors into a ready-made workspace: a team with teammates, a *Product Launch* board, and ten tasks spread across To Do, In Progress and Done, with overdue, due-today and upcoming deadlines.
+* The sample data is created automatically on first start and never duplicated. The shared demo account can't be renamed or deleted by visitors.
+* Demo login: `demo@taskly.dev` / `demo1234`. Turn it off with `DEMO_ENABLED=false`.
+
 ### 1. Interactive Kanban Workspace
 * **Flexible Column Management:** Create, rename, reorder, or delete custom workflow columns.
 * **Task Card Management:** Create tasks with rich descriptions, priorities (Low, Medium, High), due dates, and assignees.
@@ -134,7 +139,7 @@ The fastest way to run Taskly. You only need [Docker Desktop](https://www.docker
 docker compose up --build
 ```
 
-Then open **`http://localhost:8080`** and create an account. The first build takes a few minutes; later starts are quick.
+Then open **`http://localhost:8080`** and click **Try the live demo**, or create an account. The first build takes a few minutes; later starts are quick.
 
 * The Angular client is compiled inside the image and served by Spring Boot, so it is always the latest code.
 * Data is kept in the `taskly-db` volume and survives restarts. `docker compose down` stops everything; `docker compose down -v` also deletes the data.
@@ -164,6 +169,7 @@ To run Taskly without Docker, make sure you have:
 | `DATABASE_PASSWORD` | `123` | Database user password |
 | `JWT_SECRET` | *(random per startup)* | Secret used to sign login tokens, at least 32 characters. **Required in production**: without it, a random key is generated and everyone is logged out on each restart |
 | `JWT_EXPIRATION_MS` | `86400000` | Token lifetime in milliseconds (default 24 hours) |
+| `DEMO_ENABLED` | `true` | Creates the sample demo workspace on first start and shows **Try the live demo** on the login page |
 
 Generate a strong secret with `openssl rand -base64 48` (or PowerShell: `[Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Maximum 256 }))`).
 
