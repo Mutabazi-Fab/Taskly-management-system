@@ -8,6 +8,7 @@ import { BoardService } from '../../core/services/board.service';
 import { TaskService } from '../../core/services/task.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ToastService, ToastType } from '../../core/services/toast.service';
+import { CelebrationService, Point } from '../../core/services/celebration.service';
 import { Team, TeamMember } from '../../core/models/team.model';
 import { Board, TaskList, BoardStats } from '../../core/models/board.model';
 import { Task, TaskPriority, TaskStatus } from '../../core/models/task.model';
@@ -110,6 +111,20 @@ export class DashboardComponent implements OnInit {
 
   showToast(message: string, type: ToastType = 'success'): void {
     this.toastService.show(message, type);
+  }
+
+  // Confetti + a cheer whenever a task is finished (only after the server has saved it)
+  private celebration = inject(CelebrationService);
+
+  private celebrateCompletion(origin?: Point): void {
+    this.celebration.celebrate(origin);
+    this.showToast('🎉 Task completed! Nice work.', 'success');
+  }
+
+  private centerOf(element: Element | null): Point | undefined {
+    if (!element) return undefined;
+    const rect = element.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
   }
 
   // Custom Confirmation Modal System
@@ -382,9 +397,11 @@ export class DashboardComponent implements OnInit {
   toggleTaskCompletion(task: Task, event: any): void {
     const isChecked = event.target.checked;
     const nextStatus: TaskStatus = isChecked ? 'DONE' : 'TODO';
-    
+    const origin = this.centerOf(event.target);
+
     this.taskService.updateTaskStatus(task.id, nextStatus).subscribe({
       next: () => {
+        if (nextStatus === 'DONE' && task.status !== 'DONE') this.celebrateCompletion(origin);
         this.loadMyTasks();
         this.loadAllTasks();
         const board = this.selectedBoard();
@@ -687,7 +704,7 @@ export class DashboardComponent implements OnInit {
     this.tasksMap.set(currentMap);
 
     this.draggedTask.set(null);
-    this.sendMoveRequest(task, targetListId, nextStatus, targetList?.name);
+    this.sendMoveRequest(task, targetListId, nextStatus, targetList?.name, { x: event.clientX, y: event.clientY });
   }
 
   // The status a task gets when placed in a column, guessed from the column's name
@@ -704,7 +721,7 @@ export class DashboardComponent implements OnInit {
 
   // Saves a move on the server, then reloads the board. If it fails, the reload
   // also puts an optimistically moved card back where it really is.
-  private sendMoveRequest(task: Task, targetListId: string, status: TaskStatus, targetListName?: string): void {
+  private sendMoveRequest(task: Task, targetListId: string, status: TaskStatus, targetListName?: string, origin?: Point): void {
     const reloadBoard = () => {
       const board = this.selectedBoard();
       if (board) this.loadBoardData(board.id);
@@ -715,7 +732,11 @@ export class DashboardComponent implements OnInit {
         reloadBoard();
         this.loadAllTasks();
         this.loadMyTasks();
-        this.showToast(`Task moved to ${targetListName || 'new column'}.`, 'success');
+        if (status === 'DONE' && task.status !== 'DONE') {
+          this.celebrateCompletion(origin);
+        } else {
+          this.showToast(`Task moved to ${targetListName || 'new column'}.`, 'success');
+        }
       },
       error: (err) => {
         reloadBoard();
@@ -761,9 +782,14 @@ export class DashboardComponent implements OnInit {
     this.taskService.updateTask(task.id, payload).subscribe({
       next: () => {
         if (this.editTaskStatus() !== task.status) {
-          this.taskService.updateTaskStatus(task.id, this.editTaskStatus()).subscribe({
+          const newStatus = this.editTaskStatus();
+          this.taskService.updateTaskStatus(task.id, newStatus).subscribe({
             next: () => {
-              this.showToast('Task updated successfully.', 'success');
+              if (newStatus === 'DONE') {
+                this.celebrateCompletion();
+              } else {
+                this.showToast('Task updated successfully.', 'success');
+              }
               const board = this.selectedBoard();
               if (board) this.loadBoardData(board.id);
               this.loadAllTasks();
